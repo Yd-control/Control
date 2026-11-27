@@ -52,12 +52,21 @@ async function boot(u){
   if(!has){box(`<div style="font-size:36px">📦</div><h2>بيانات المدرسة فارغة</h2><p style="font-size:14px;opacity:.8">يمكنك استيراد ملف نسخة احتياطية (JSON) أو البدء بقاعدة جديدة.</p>
    <div class="pe" id="fm"></div><button class="pbtn" id="fi">استيراد ملف نسخة احتياطية</button><button class="pbtn g" id="fs">بدء فارغًا</button>`);return}}
  finish()}
-function finish(){if(done)return;done=true;$('#lk').style.display='none';const b=$('[data-a="bk"]');if(b)b.style.display=S.role==='admin'?'':'none';resolveReady(true)}
+async function syncSchool(){let v=null,fresh=false;
+ try{const d=await fs.doc(P('cfg/school')).get();if(d.exists)v=(d.data()||{}).v||null}catch(e){return}
+ try{fresh=!!((await fs.doc('schools/'+S.sid).get()).data()||{}).fresh}catch(e){}
+ let cur=null;try{cur=localStorage.getItem('ctl_school')}catch(e){}
+ const nw=v?JSON.stringify(v):null;
+ if(nw!==cur){try{nw?localStorage.setItem('ctl_school',nw):localStorage.removeItem('ctl_school')}catch(e){}
+  const k='ctl_scrl';let n=0;try{n=+sessionStorage.getItem(k)||0;sessionStorage.setItem(k,n+1)}catch(e){}
+  if(n<2){location.reload();return 'reload'}}
+ S.needSetup=!v&&fresh&&S.role==='admin'}
+async function finish(){if(done)return;if(await syncSchool()==='reload')return;done=true;try{sessionStorage.setItem('ctl_scrl',0)}catch(e){}$('#lk').style.display='none';const b=$('[data-a="bk"]');if(b)b.style.display=S.role==='admin'?'':'none';resolveReady(true);if(S.needSetup)setTimeout(()=>{window.__fresh=true;window.openSetup&&window.openSetup()},1500)}
 async function newSchool(){
- const nm=prompt('اسم المدرسة','مدرسة الخليل بن أحمد – الحلقة الثالثة – بنين');if(!nm)return;
+ const nm=prompt('اسم المدرسة (بدون كلمة مدرسة)','');if(!nm)return;
  const nn=prompt('اسمك (المنسق)','المنسق');if(!nn)return;
  const sid='s'+Date.now().toString(36),u=auth.currentUser;
- try{await fs.doc('schools/'+sid).set({name:nm,at:Date.now()});await fs.doc('users/'+u.uid).set({sid,role:'admin',name:nn,em:u.email,at:Date.now()});boot(u)}
+ try{await fs.doc('schools/'+sid).set({name:nm,at:Date.now(),fresh:true});await fs.doc('users/'+u.uid).set({sid,role:'admin',name:nn,em:u.email,at:Date.now()});boot(u)}
  catch(e){alert(errT(e)+'\n(إنشاء مدرسة جديدة مسموح لحساب المنسق الرئيسي فقط)')}}
 document.addEventListener('click',async e=>{const t=e.target;if(!t||!t.id)return;
  if(t.id==='fc'){const em=$('#fe').value.trim(),pw=$('#fp').value;if(!em||pw.length<8){$('#fm').textContent='اكتب بريدك وكلمة مرور من 8 أحرف على الأقل ثم اضغط مرة أخرى';return}try{await auth.createUserWithEmailAndPassword(em,pw)}catch(er){$('#fm').textContent=errT(er)}}else if(t.id==='fb')signIn();else if(t.id==='fr')resetPw();else if(t.id==='fo')logout();else if(t.id==='fn')newSchool();
@@ -77,11 +86,13 @@ async function admOpen(){if(S.role!=='admin')return;const e=admBox();e.style.dis
  <h3>👥 المشرفون والمستخدمون</h3>${rows||'<div>لا يوجد</div>'}
  <h3>➕ إضافة مستخدم</h3><input id="un" placeholder="الاسم" style="direction:rtl;text-align:right"><input id="ue" type="email" placeholder="البريد الإلكتروني"><input id="up" type="text" placeholder="كلمة مرور مؤقتة (8 أحرف على الأقل)">
  <select id="ur" style="direction:rtl"><option value="sup">مشرف</option><option value="admin">منسق (صلاحية كاملة)</option></select><button class="pbtn" data-u="add">إضافة</button><div class="msg" id="um"></div>
+ <h3>🏫 إعداد المدرسة</h3><button class="pbtn" data-u="su">إعداد المدرسة والصفوف والمواعيد واستيراد الطلاب</button>
  <h3>💾 النسخ الاحتياطي</h3><button class="pbtn g" data-u="ex">تصدير نسخة (ملف JSON)</button><button class="pbtn g" data-u="im">استيراد نسخة (يستبدل المتطابق)</button>
  <h3>🚪 الحساب</h3><button class="pbtn g" data-u="out">تسجيل الخروج</button></div>`}
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-a="bk"]');if(b){admOpen();return}
  const t=e.target.closest&&e.target.closest('#adm [data-u]');if(!t)return;const a=t.dataset.u,m=()=>$('#um');
  if(a==='x')$('#adm').style.display='none';
+ else if(a==='su'){$('#adm').style.display='none';window.openSetup&&window.openSetup()}
  else if(a==='out')logout();
  else if(a==='rs'){try{await auth.sendPasswordResetEmail(t.dataset.e);m().style.color='#059669';m().textContent='أُرسل رابط تغيير كلمة المرور'}catch(er){m().style.color='#dc2626';m().textContent=errT(er)}}
  else if(a==='rm'){if(!confirm('إزالة وصول هذا المستخدم؟'))return;try{await fs.doc('users/'+t.dataset.i).delete();admOpen()}catch(er){alert(errT(er))}}
