@@ -339,15 +339,16 @@ async function addPhotoPages(pg,logo,onlyDate,rows){
  return n;
 }
 /* daily PDF report */
-const EMB=(()=>{try{return localStorage.getItem('ctl_logo')||'emblem.png'}catch(e){return 'emblem.png'}})(),RW=1240,RH=1754,FN='Tajawal,Tahoma,Arial,sans-serif';
+const EMB=(()=>{try{return localStorage.getItem('ctl_logo')||'emblem.png?v=2'}catch(e){return 'emblem.png?v=2'}})(),RW=1240,RH=1754,FN='Tajawal,Tahoma,Arial,sans-serif';
 const C={navy:'#1e3a8a',ind:'#4f46e5',teal:'#0d9488',gold:'#d97706',grn:'#16a34a',red:'#dc2626',ink:'#1b2240',mu:'#6b7394',bd:'#dde2f0',pn:'#f4f6fc'};
 function newPg(){const c=document.createElement('canvas');c.width=RW;c.height=RH;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,RW,RH);x.direction='rtl';return {c,x}}
 function tx(x,t,px,py,sz,col,w='500',al='right'){x.font=`${w} ${sz}px ${FN}`;x.fillStyle=col;x.textAlign=al;x.textBaseline='alphabetic';x.fillText(String(t),px,py)}
 function bx2(x,a,b,w,h,r,f,s){x.beginPath();if(x.roundRect)x.roundRect(a,b,w,h,r);else x.rect(a,b,w,h);if(f){x.fillStyle=f;x.fill()}if(s){x.lineWidth=2;x.strokeStyle=s;x.stroke()}}
 const grad=(x,a,b,c1,c2)=>{const g=x.createLinearGradient(a,0,b,0);g.addColorStop(0,c1);g.addColorStop(1,c2);return g};
+function fitDraw(x,im,bx,by,bw,bh){const k=Math.min(bw/im.width,bh/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,bx+(bw-w)/2,by+(bh-h)/2,w,h)}
 function letter(x,img,mini){x.fillStyle=grad(x,0,RW,C.navy,C.teal);x.fillRect(0,0,RW,14);
- if(mini){tx(x,'وزارة التربية والتعليم',RW-60,62,30,C.navy,'800');tx(x,SCH(),RW-60,100,24,C.teal,'700');if(img)x.drawImage(img,60,28,66,86);x.fillStyle=grad(x,60,RW-60,C.teal,C.gold);x.fillRect(60,124,RW-120,4);return 150}
- if(img)x.drawImage(img,RW/2-58,34,116,150);
+ if(mini){tx(x,'وزارة التربية والتعليم',RW-60,62,30,C.navy,'800');tx(x,SCH(),RW-60,100,24,C.teal,'700');if(img)fitDraw(x,img,60,28,66,86);x.fillStyle=grad(x,60,RW-60,C.teal,C.gold);x.fillRect(60,124,RW-120,4);return 150}
+ if(img)fitDraw(x,img,RW/2-58,34,116,150);
  tx(x,'وزارة التربية والتعليم',RW/2,232,46,C.navy,'800','center');
  tx(x,SCH(),RW/2,282,32,C.teal,'700','center');
  x.fillStyle=grad(x,60,RW-60,C.navy,C.gold);x.fillRect(60,304,RW-120,4);return 330}
