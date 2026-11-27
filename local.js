@@ -3,7 +3,24 @@
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mime=n=>/\.pdf$/i.test(n)?'application/pdf':/\.jpe?g$/i.test(n)?'image/jpeg':/\.png$/i.test(n)?'image/png':/\.json$/i.test(n)?'application/json':/\.csv$/i.test(n)?'text/csv':'application/octet-stream';
-const dl={save:async({filename,data})=>{const bl=new Blob([data],{type:mime(filename)}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},6000)}};
+const fmtKB=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+const dl={save:({filename,data,after})=>{
+ const type=mime(filename),blob=new Blob([data],{type}),url=URL.createObjectURL(blob);
+ let file=null;try{file=new File([blob],filename,{type})}catch(e){}
+ const can=!!(file&&navigator.canShare&&navigator.canShare({files:[file]}));
+ const old=document.getElementById('dlm');if(old)old.remove();
+ const m=document.createElement('div');m.id='dlm';
+ m.innerHTML=`<div class="dlb"><div style="font-size:34px">✅</div><b>الملف جاهز</b><div class="dln">${esc(filename)}<br><small>${fmtKB(blob.size)}</small></div>
+ ${can?'<button class="dlp" data-d="share">📤 مشاركة / حفظ في الملفات</button>':''}<button class="dlp ${can?'g':''}" data-d="open">👁️ فتح الملف</button><button class="dlp g" data-d="down">⬇️ تنزيل</button><button class="dlp g" data-d="x">إغلاق</button>
+ <p class="dls">للحفظ: اختر «مشاركة» ثم «حفظ في الملفات»، أو أرسله مباشرة عبر واتساب أو البريد.</p></div>`;
+ document.body.appendChild(m);
+ m.addEventListener('click',async e=>{const b=e.target.closest('[data-d]');if(!b){if(e.target===m){m.remove()}return}
+  const a=b.dataset.d;
+  if(a==='share'){try{await navigator.share({files:[file],title:filename});after&&after()}catch(er){}}
+  else if(a==='open'){window.open(url,'_blank');after&&after()}
+  else if(a==='down'){const l=document.createElement('a');l.href=url;l.download=filename;document.body.appendChild(l);l.click();l.remove();after&&after()}
+  else if(a==='x'){m.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}});
+ return Promise.resolve()}};
 window.claude={use:async n=>n==='downloads'?dl:null};
 const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
 const W=(k,v)=>{try{localStorage.setItem(k,typeof v==='string'&&k==='ctl_school_raw'?v:JSON.stringify(v))}catch(e){}};
@@ -22,10 +39,8 @@ async function makeBackup(full){
  return out}
 async function saveBackup(full){
  const d=await makeBackup(full),name='control-'+(full?'full':'light')+'-'+new Date().toISOString().slice(0,10)+'.json',json=JSON.stringify(d);
- let shared=false;
- try{const f=new File([json],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'نسخة كنترول الاحتياطية'});shared=true}}catch(e){if(e&&e.name==='AbortError')return false}
- if(!shared)await dl.save({filename:name,data:new TextEncoder().encode(json)});
- W('ctl_lastbk',Date.now());return true}
+ await dl.save({filename:name,data:new TextEncoder().encode(json),after:()=>W('ctl_lastbk',Date.now())});return true}
+
 function fromCloud(d){ /* تحويل نسخة السحابة القديمة إلى بيانات محلية */
  const g=(c,id)=>d[c]&&d[c][id]?d[c][id]:null,v=(c,id)=>{const o=g(c,id);return o&&Array.isArray(o.v)?o.v:null};
  const ls={};const put=(k,x)=>{ls[k]=JSON.stringify(x)};
@@ -58,6 +73,11 @@ css.textContent=`#adm{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,
 #adm .bx{background:var(--card);color:var(--tx);border-radius:22px;padding:18px;width:100%;max-width:460px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #adm h3{margin:14px 0 6px}#adm .pbtn{width:100%;padding:13px;border:0;border-radius:14px;background:#c4283f;color:#fff;font:700 16px Tajawal,system-ui,sans-serif;margin-top:8px;cursor:pointer}
 #adm .pbtn.g{background:#e5e7eb;color:#111}#adm .pbtn.r{background:#fee2e2;color:#b91c1c}#adm .msg{font-size:13px;margin-top:6px;min-height:18px}#adm .st{font-size:13px;opacity:.8;line-height:1.8}
+#dlm{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+#dlm .dlb{background:var(--card,#fff);color:var(--tx,#111);border-radius:22px;padding:20px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#dlm .dln{margin:8px 0 12px;font-size:14px;word-break:break-all;direction:ltr}
+#dlm .dlp{width:100%;padding:13px;border:0;border-radius:14px;background:#c4283f;color:#fff;font:700 16px Tajawal,system-ui,sans-serif;margin-top:8px;cursor:pointer}#dlm .dlp.g{background:#e5e7eb;color:#111}
+#dlm .dls{font-size:12px;opacity:.7;margin:12px 0 0;line-height:1.7}
 #bkb{position:fixed;top:0;inset-inline:0;z-index:8000;background:#fef3c7;color:#78350f;padding:9px 12px;display:none;align-items:center;gap:8px;font:600 13px Tajawal,system-ui,sans-serif}
 #bkb button{border:0;border-radius:10px;padding:6px 10px;font:700 12px Tajawal,system-ui,sans-serif;cursor:pointer}`;
 document.head.appendChild(css);

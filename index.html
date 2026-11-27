@@ -339,7 +339,7 @@ async function addPhotoPages(pg,logo,onlyDate,rows){
  return n;
 }
 /* daily PDF report */
-const EMB='emblem.png',RW=1240,RH=1754,FN='Tajawal,Tahoma,Arial,sans-serif';
+const EMB=(()=>{try{return localStorage.getItem('ctl_logo')||'emblem.png'}catch(e){return 'emblem.png'}})(),RW=1240,RH=1754,FN='Tajawal,Tahoma,Arial,sans-serif';
 const C={navy:'#1e3a8a',ind:'#4f46e5',teal:'#0d9488',gold:'#d97706',grn:'#16a34a',red:'#dc2626',ink:'#1b2240',mu:'#6b7394',bd:'#dde2f0',pn:'#f4f6fc'};
 function newPg(){const c=document.createElement('canvas');c.width=RW;c.height=RH;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,RW,RH);x.direction='rtl';return {c,x}}
 function tx(x,t,px,py,sz,col,w='500',al='right'){x.font=`${w} ${sz}px ${FN}`;x.fillStyle=col;x.textAlign=al;x.textBaseline='alphabetic';x.fillText(String(t),px,py)}
@@ -439,7 +439,7 @@ function showReview(){const y=$('#ov').scrollTop,w0=document.querySelector('#bx 
 document.addEventListener('change',e=>{if(e.target.id==='rpv'){rpi=+e.target.value;showReview()}});
 function tbl(x,cols,data,ty,rh,cf){let cr=RW-60;bx2(x,60,ty,RW-120,46,10,C.navy);cols.forEach(c=>{tx(x,c[0],cr-c[1]/2,ty+31,20,'#fff','700','center');cr-=c[1]});data.forEach((r,i)=>{const yy=ty+46+i*rh;if(i%2==0)bx2(x,60,yy,RW-120,rh,0,C.pn);cr=RW-60;cols.forEach((c,j)=>{tx(x,r[j],cr-c[1]/2,yy+rh/2+7,20,cf?cf(i,j,r):C.ink,'700','center');cr-=c[1]})})}
 async function makeFinal(){
- const rows=sched.slice().sort((a,b)=>a.d.localeCompare(b.d)||a.g-b.g||TR.indexOf(a.t)-TR.indexOf(b.t));
+ const rows=sched.filter(x=>x.s).sort((a,b)=>a.d.localeCompare(b.d)||a.g-b.g||TR.indexOf(a.t)-TR.indexOf(b.t));
  if(!rows.length){off();alert('لا توجد اختبارات');return}
  let dls=null;try{dls=window.claude?await claude.use('downloads'):null}catch(e){}
  if(!dls||!window.jspdf){off();alert('تعذر إنشاء الـ PDF في هذا العرض. افتح الصفحة من رابط النشر');return}
@@ -480,7 +480,7 @@ async function makeFinal(){
   tbl(x,[['اليوم',200],['التاريخ',200],['عدد الاختبارات',200],['الغائبون',200],['ورقي / إلكتروني',200]],dates.map((d,i)=>{const rr=rows.filter(r=>r.d===d),p=rr.filter(r=>(r.m||'').includes('ورقي')).length,q=rr.filter(r=>(r.m||'').includes('إلكتروني')).length;return [dn(d),d,rr.length,dayAb[i],p+' / '+q]}),y,Math.min(34,(RH-150-y-46)/dates.length),(i,j,r)=>j===3&&r[3]>0?C.red:C.ink);
   P=newPg();pg.push(P);x=P.x;y=letter(x,img,true)+40;sec('الطلاب الأكثر غياباً',y);y+=22;
   const cnt={};ak.forEach(a=>cnt[a.id]=(cnt[a.id]||0)+1);const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  if(!top.length){bx2(x,60,y,RW-120,90,18,'#dcfce7','#86efac');tx(x,'لا توجد حالات غياب مسجلة',RW/2,y+55,28,C.grn,'800','center');y+=110}
+  if(!top.length){bx2(x,60,y,RW-120,90,18,'#dcfce7','#86efac');tx(x,'لا توجد حالات غياب مسجلة',RW/2,y+55,28,C.grn,'800','center');y+=150}
   else{tbl(x,[['#',80],['الطالب',420],['الصف · المسار',260],['القاعة',160],['أيام الغياب',160]],top.map(([id,c],i)=>{const s=stu[id];return [i+1,s.name,`${s.g} · ${s.t}`,s.h,c]}),y,44,(i,j)=>j===4?C.red:C.ink);y+=46+top.length*44+30}
   sec('التوقيعات والاعتماد',y);y+=24;
   [['رئيس الكنترول',RW-60-520],['مدير المدرسة',60]].forEach(s=>{bx2(x,s[1],y,520,150,18,C.pn,C.bd);tx(x,s[0],s[1]+260,y+42,26,C.navy,'800','center');x.strokeStyle=C.mu;x.setLineDash([6,6]);x.beginPath();x.moveTo(s[1]+50,y+112);x.lineTo(s[1]+470,y+112);x.stroke();x.setLineDash([]);tx(x,'الاسم والتوقيع',s[1]+260,y+138,17,C.mu,'500','center')});
@@ -874,6 +874,9 @@ function showSetup(){
  <div class="card" style="margin-bottom:10px"><b>القاعات</b>
  <textarea id="sc_rm" rows="6" style="${INP}">${esc(c.rooms.map(r=>[r.k,r.g,r.t].join(' | ')).join('\n'))}</textarea>
  <p class="note">سطر لكل قاعة: اسم/رقم القاعة | الصف | المسار. مثال: 1 | 11 | عام. ويمكن لاحقًا استيرادها من ملف.</p></div>
+ <div class="card" style="margin-bottom:10px"><b>الشعار في التقارير</b>
+ <p class="note">الشعار الحالي يظهر في ترويسة التقارير. ارفع صورة شعار ملوّن (PNG بخلفية شفافة أفضل) لتحل محله.</p>
+ <div class="row" style="align-items:center"><img src="${EMB}" style="height:56px;width:auto;border-radius:8px;background:#fff;padding:4px"><label class="btn s" style="cursor:pointer">🖼️ رفع شعار<input type="file" id="sc_logo" accept="image/*" hidden></label><button class="btn g" data-a="sc_logo0">استعادة الافتراضي</button></div></div>
  <div id="sc_m" class="note" style="color:#dc2626"></div>
  <div class="row"><button class="btn" data-a="sc_save">💾 حفظ الإعداد</button><button class="btn s" data-a="sc_imp">📥 استيراد الطلاب والجدول</button><button class="btn s" data-a="sc_rst">📂 لدي نسخة احتياطية</button></div>
  <p class="note">بعد الحفظ يُعاد تحميل التطبيق لتطبيق الإعداد. احفظ الإعداد قبل الاستيراد.</p>`)}
@@ -931,10 +934,11 @@ async function impSched(f){const R=$('#sc_r');R.textContent='جارٍ القرا
   R.textContent='تمت إضافة '+add+' اختبارًا'+(bad.length?'\nتم تخطي '+bad.length+':\n'+bad.slice(0,8).join('\n'):'')}
  catch(e){R.textContent='تعذر الاستيراد: '+(e&&e.message||e)}}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;
- if(a==='sc_save')scSave();else if(a==='sc_rst'){window.ctlRestore&&window.ctlRestore($('#sc_m'))}else if(a==='sc_imp')showImport();
+ if(a==='sc_save')scSave();else if(a==='sc_logo0'){try{localStorage.removeItem('ctl_logo')}catch(er){}location.reload()}else if(a==='sc_rst'){window.ctlRestore&&window.ctlRestore($('#sc_m'))}else if(a==='sc_imp')showImport();
  else if(a==='sc_t1')dlCsv('قالب-الطلاب.csv',[['الاسم','الصف','المسار','الشعبة','القاعة'],['','','','','']]);
  else if(a==='sc_t2')dlCsv('قالب-جدول-الاختبارات.csv',[['التاريخ','الصف','المسار','المادة','النوع'],['','','','','']])});
-document.addEventListener('change',e=>{const i=e.target;if(i.id==='sc_f1'&&i.files[0])impStudents(i.files[0]);else if(i.id==='sc_f2'&&i.files[0])impSched(i.files[0])});
+document.addEventListener('change',e=>{const i=e.target;if(i.id==='sc_logo'&&i.files[0]){const f=i.files[0],u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,360/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{localStorage.setItem('ctl_logo',c.toDataURL('image/png'));toast('تم حفظ الشعار… جارٍ إعادة التحميل',0);setTimeout(()=>location.reload(),900)}catch(er){alert('تعذر حفظ الشعار')}};im.onerror=()=>alert('تعذرت قراءة الصورة');im.src=u;return}
+if(i.id==='sc_f1'&&i.files[0])impStudents(i.files[0]);else if(i.id==='sc_f2'&&i.files[0])impSched(i.files[0])});
 window.openSetup=showSetup;
 if(SC){const n=$('#scn');if(n)n.textContent='جدول اختبارات '+SC.term+' '+SC.year+' (الصفوف '+GR.join('، ')+').'}
 
