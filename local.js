@@ -94,6 +94,8 @@ async function panel(){
  <h3>💾 النسخ الاحتياطي</h3><button class="pbtn" data-u="bf">حفظ نسخة كاملة (مع الصور)</button><button class="pbtn g" data-u="bl">حفظ نسخة خفيفة (بدون صور)</button><button class="pbtn g" data-u="rs">استرجاع نسخة من ملف</button>
  <div class="msg" id="um"></div>
  <p class="st">بياناتك محفوظة على هذا الجهاز فقط. احفظ النسخة في «الملفات» أو أرسلها لنفسك، وكرّر ذلك بين وقت وآخر.</p>
+ <h3>🆕 فصل دراسي جديد</h3><p class="st">للانتقال إلى الفصل الثاني: احفظ أرشيف الفصل الحالي، ثم صفِّر الغياب والتصحيح والجدول والوثائق مع إبقاء المدرسة والقاعات والطلاب لتعدّلها.</p>
+ <button class="pbtn g" data-u="nt1">1) حفظ نسخة أرشيف الفصل (كاملة)</button><button class="pbtn" data-u="nt2">2) بدء فصل جديد</button><div class="msg" id="um2"></div>
  <h3>🗑️ حذف</h3><button class="pbtn r" data-u="wp">مسح كل بيانات هذا الجهاز</button></div>`}
 document.addEventListener('click',async ev=>{
  const b=ev.target.closest&&ev.target.closest('[data-a="bk"]');if(b){panel();return}
@@ -103,6 +105,16 @@ document.addEventListener('click',async ev=>{
  else if(a==='su'){adm().style.display='none';window.openSetup&&window.openSetup()}
  else if(a==='bf'||a==='bl'){m().style.color='#059669';m().textContent='جارٍ التجهيز…';try{const ok=await saveBackup(a==='bf');m().textContent=ok?'تم تجهيز النسخة. احفظها في «الملفات» أو أرسلها لنفسك':'';if(ok)setTimeout(panel,1500)}catch(er){m().style.color='#dc2626';m().textContent='تعذر الحفظ: '+(er&&er.message||er)}}
  else if(a==='rs')doRestore(m());
+ else if(a==='nt1'){m().style.color='#059669';m().textContent='جارٍ التجهيز…';try{await saveBackup(true);m().textContent='احفظ الملف من النافذة (مشاركة أو تنزيل)، ثم اضغط «2) بدء فصل جديد»'}catch(er){m().style.color='#dc2626';m().textContent='تعذر الحفظ: '+(er&&er.message||er)}}
+ else if(a==='nt2'){const ok=Date.now()-LS('ctl_lastbk',0)<20*60000;if(!ok){m().style.color='#dc2626';m().textContent='احفظ نسخة الأرشيف أولًا (الخطوة 1) وأكّد حفظها من نافذة الملف.';return}
+  if(!confirm('سيتم تصفير الغياب والتصحيح والمراقبين والجدول والوثائق والصور. ستبقى المدرسة والقاعات والطلاب. هل حفظت نسخة الأرشيف؟'))return;
+  try{abs={};checks={};admAb={};svH();sv('ctl_chk',checks);sv('ctl_admab',admAb);
+   halls.forEach(h=>{h.sup={};h.ch=[];h.ev=[]});svH();
+   X.obs=[];X.rcv=[];X.dck=[];(X.f03||[]).forEach(f=>{f.done=0;f.note=''});['obs','rcv','dck','f03'].forEach(sx);
+   sched=[];sv('ctl_sched',sched);await idbClear();
+   adm()&&(adm().style.display='none');toast('تم بدء الفصل الجديد. عدّل الإعداد (الفترات والقاعات) ثم استورد قائمة الطلاب والجدول',0);
+   setTimeout(()=>{window.__fresh=false;window.openSetup&&window.openSetup();renderToday();renderCats()},700)}
+  catch(er){m().style.color='#dc2626';m().textContent='تعذر التصفير: '+(er&&er.message||er)}}
  else if(a==='wp'){if(!confirm('سيُحذف كل شيء على هذا الجهاز (الطلاب والغياب والصور والإعدادات) ولا يمكن التراجع. هل حفظت نسخة احتياطية؟'))return;if(!confirm('تأكيد أخير: مسح كل البيانات؟'))return;
   Object.keys(localStorage).filter(k=>k.indexOf('ctl_')===0).forEach(k=>localStorage.removeItem(k));try{await idbClear()}catch(x){}location.reload()}
 });

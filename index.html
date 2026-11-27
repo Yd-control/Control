@@ -900,30 +900,44 @@ async function scSave(){const v=scRead();if(!v)return;
 function csvParse(t){t=t.replace(/^﻿/,'');const first=t.split('\n')[0]||'',dl=[',',';','\t'].map(d=>[d,first.split(d).length]).sort((a,b)=>b[1]-a[1])[0][0];const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}else if(ch=='"')q=true;else if(ch==dl){r.push(c);c=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
 function loadXlsx(){return window.XLSX?Promise.resolve():new Promise((ok2,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok2;s.onerror=()=>no(new Error('تعذر تحميل مكتبة Excel (تحتاج اتصالًا). احفظ الملف بصيغة CSV وأعد المحاولة'));document.head.appendChild(s)})}
 async function readTable(f){if(/\.csv$|\.txt$/i.test(f.name))return csvParse(await f.text());await loadXlsx();const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd',defval:''})}
-const COL={name:['الاسم','اسم الطالب','الطالب','name'],g:['الصف','grade'],t:['المسار','track'],c:['الشعبة','الفصل','section'],r:['القاعة','room'],d:['التاريخ','date'],s:['المادة','subject'],m:['النوع','نوع الاختبار','type']};
+const COL={id:['رقم الطالب','الرقم','رقم القيد','id'],name:['الاسم','اسم الطالب','الطالب','name'],g:['الصف','grade'],t:['المسار','track'],c:['الشعبة','الفصل','section'],r:['القاعة','room'],d:['التاريخ','date'],s:['المادة','subject'],m:['النوع','نوع الاختبار','type']};
 function colMap(h){const m={};h.forEach((x,i)=>{const k=A2W(x).toLowerCase();for(const f in COL)if(COL[f].includes(k)&&!(f in m))m[f]=i});return m}
 const normDate=v=>{v=A2W(v);let m;if(m=v.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/))return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);if(m=v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/))return m[3]+'-'+pad(+m[2])+'-'+pad(+m[1]);return ''};
 const gradeOf=v=>{const m=A2W(v).match(/\d+/);return m?+m[0]:NaN};
 function showImport(msg){
  open(head('📥 استيراد البيانات')+`<div class="card" style="margin-bottom:10px"><b>1) الطلاب</b>
- <p class="note">أعمدة الملف: الاسم، الصف، المسار، الشعبة، القاعة. إن كُتبت القاعة يدخل الطالب القاعة، وإلا يدخل قائمة المنهل. الصفوف المعرّفة: ${GR.join('، ')} · المسارات: ${esc(TR.join('، '))}</p>
- <div class="row"><button class="btn s" data-a="sc_t1">⬇️ تنزيل القالب</button><label class="btn" style="cursor:pointer">📂 رفع ملف الطلاب<input type="file" id="sc_f1" accept=".csv,.xlsx,.xls,.txt" hidden></label></div></div>
+ <p class="note">أعمدة الملف: الاسم، الصف، المسار، الشعبة، القاعة، رقم الطالب (اختياري). إن كُتبت القاعة يدخل الطالب القاعة، وإلا يدخل قائمة المنهل. الصفوف المعرّفة: ${GR.join('، ')} · المسارات: ${esc(TR.join('، '))}</p>
+ <label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:14px"><input type="checkbox" id="sc_rep" style="width:20px;height:20px;margin-top:2px"><span><b>استبدال قائمة الطلاب الحالية</b> بما في الملف (للفصل الجديد): تُحذف الأسماء القديمة من القاعات والمنهل.</span></label>
+ <div class="row"><button class="btn s" data-a="sc_t1">⬇️ تنزيل القالب</button><button class="btn s" data-a="sc_exp">📤 تصدير القائمة الحالية</button><label class="btn" style="cursor:pointer">📂 رفع ملف الطلاب<input type="file" id="sc_f1" accept=".csv,.xlsx,.xls,.txt" hidden></label></div>
+ <p class="note">للفصل الجديد: صدّر القائمة الحالية، عدّلها في Excel (أضف أو احذف أو غيّر القاعات)، ثم ارفعها مع تفعيل «الاستبدال». عمود «رقم الطالب» اختياري ويحفظ هوية الطالب بين الفصول.</p></div>
  <div class="card" style="margin-bottom:10px"><b>2) جدول الاختبارات</b>
  <p class="note">أعمدة الملف: التاريخ، الصف، المسار، المادة، النوع (ورقي / إلكتروني / ورقي وإلكتروني). اترك المسار فارغًا ليشمل كل المسارات.</p>
  <div class="row"><button class="btn s" data-a="sc_t2">⬇️ تنزيل القالب</button><label class="btn" style="cursor:pointer">📂 رفع جدول الاختبارات<input type="file" id="sc_f2" accept=".csv,.xlsx,.xls,.txt" hidden></label></div></div>
  <div id="sc_r" class="card" style="white-space:pre-line">${esc(msg||'اختر ملفًا لبدء الاستيراد.')}</div>
  <p class="note">الاستيراد يضيف ولا يحذف، ويتخطى الأسماء المكررة في نفس الصف والقاعة.</p>`)}
 async function dlCsv(name,rows){const d=await claude.use('downloads');await d.save({filename:name,data:'﻿'+rows.map(r=>r.map(x=>/[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x).join(',')).join('\r\n')})}
+function expRoster(){const rows=[['الاسم','الصف','المسار','الشعبة','القاعة','رقم الطالب']];
+ halls.forEach(h=>(h.st||[]).forEach(x=>rows.push([x.name,x.g,x.t,x.c||'',h.n,x.id||''])));
+ man.forEach(x=>rows.push([x.name,x.g,x.t,x.c||'','',x.id||'']));
+ if(rows.length<2){alert('لا توجد قائمة طلاب لتصديرها');return}
+ dlCsv('قائمة-الطلاب-'+ymd(new Date())+'.csv',rows)}
 async function impStudents(f){const R=$('#sc_r');R.textContent='جارٍ القراءة…';
  try{const t=await readTable(f),m=colMap(t[0]||[]);if(!('name' in m)||!('g' in m)){R.textContent='لم أجد عمودي «الاسم» و«الصف» في السطر الأول.';return}
-  let add=0,dup=0,bad=[],toH=0,toM=0;
+  const rep=!!($('#sc_rep')&&$('#sc_rep').checked);
+  if(rep&&!confirm('سيتم حذف قائمة الطلاب الحالية (القاعات والمنهل) واستبدالها بما في الملف. هل حفظت نسخة احتياطية؟'))return;
+  const stage=[];let bad=[];
   for(let i=1;i<t.length;i++){const r=t[i],nm=String(r[m.name]||'').trim();if(!nm)continue;const g=gradeOf(r[m.g]);if(!GR.includes(g)){bad.push('سطر '+(i+1)+': صف غير معرّف');continue}
    let tr=String((m.t!=null?r[m.t]:'')||'').trim();if(!tr)tr=TR[0];if(!TR.includes(tr)){bad.push('سطر '+(i+1)+': مسار غير معرّف «'+tr+'»');continue}
-   const c=String((m.c!=null?r[m.c]:'')||'').trim(),rm=A2W(m.r!=null?r[m.r]:'');
-   if(rm){const h=getR(rm);if(h.st.some(s=>s.name===nm&&s.g===g)){dup++;continue}h.st.push({id:uid(),name:nm,g,t:tr,c});toH++;add++}
-   else{if(man.some(s=>s.name===nm&&s.g===g)){dup++;continue}man.push({id:uid(),name:nm,g,t:tr,c});toM++;add++}}
+   stage.push({nm,g,tr,c:String((m.c!=null?r[m.c]:'')||'').trim(),rm:A2W(m.r!=null?r[m.r]:''),id:A2W(m.id!=null?r[m.id]:'')})}
+  if(rep&&!stage.length){R.textContent='لا توجد أسماء صالحة في الملف، لم يتغير شيء.';return}
+  let removed=0;if(rep){halls.forEach(h=>{removed+=(h.st||[]).length;h.st=[]});removed+=man.length;man=[]}
+  let add=0,dup=0,toH=0,toM=0;const seen=new Set();
+  stage.forEach(o=>{const id=o.id||uid(),mk=(o.rm?'h'+o.rm:'m')+'|'+(o.id||o.nm+'|'+o.g);if(seen.has(mk)){dup++;return}seen.add(mk);
+   if(o.rm){const h=getR(o.rm);if(!rep&&h.st.some(s=>s.name===o.nm&&s.g===o.g)){dup++;return}h.st.push({id,name:o.nm,g:o.g,t:o.tr,c:o.c});toH++;add++}
+   else{if(!rep&&man.some(s=>s.name===o.nm&&s.g===o.g)){dup++;return}man.push({id,name:o.nm,g:o.g,t:o.tr,c:o.c});toM++;add++}});
+  let orph=0;if(rep){const ids=new Set([...halls.flatMap(h=>h.st.map(s=>s.id)),...man.map(s=>s.id)]);Object.keys(abs).forEach(k=>{if(!ids.has(k.split('|')[1])){delete abs[k];orph++}})}
   svH();svM();renderCats();
-  R.textContent='تمت إضافة '+add+' طالبًا (قاعات: '+toH+' · المنهل: '+toM+')'+(dup?'\nمكرر تم تخطيه: '+dup:'')+(bad.length?'\nتم تخطي '+bad.length+':\n'+bad.slice(0,8).join('\n'):'')}
+  R.textContent=(rep?'تم استبدال القائمة: حُذف '+removed+' اسمًا قديمًا، وأُضيف ':'تمت إضافة ')+add+' طالبًا (قاعات: '+toH+' · المنهل: '+toM+')'+(dup?'\nمكرر تم تخطيه: '+dup:'')+(orph?'\nأُزيل '+orph+' سجل غياب لطلاب لم يعودوا في القائمة':'')+(bad.length?'\nتم تخطي '+bad.length+':\n'+bad.slice(0,8).join('\n'):'')}
  catch(e){R.textContent='تعذر الاستيراد: '+(e&&e.message||e)}}
 async function impSched(f){const R=$('#sc_r');R.textContent='جارٍ القراءة…';
  try{const t=await readTable(f),m=colMap(t[0]||[]);if(!('d' in m)||!('g' in m)||!('s' in m)){R.textContent='أعمدة مطلوبة: التاريخ، الصف، المادة.';return}
@@ -938,8 +952,8 @@ async function impSched(f){const R=$('#sc_r');R.textContent='جارٍ القرا
  catch(e){R.textContent='تعذر الاستيراد: '+(e&&e.message||e)}}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;
  if(a==='sc_save')scSave();else if(a==='sc_logo0'){try{localStorage.removeItem('ctl_logo')}catch(er){}location.reload()}else if(a==='sc_rst'){window.ctlRestore&&window.ctlRestore($('#sc_m'))}else if(a==='sc_imp')showImport();
- else if(a==='sc_t1')dlCsv('قالب-الطلاب.csv',[['الاسم','الصف','المسار','الشعبة','القاعة'],['','','','','']]);
- else if(a==='sc_t2')dlCsv('قالب-جدول-الاختبارات.csv',[['التاريخ','الصف','المسار','المادة','النوع'],['','','','','']])});
+ else if(a==='sc_t1')dlCsv('قالب-الطلاب.csv',[['الاسم','الصف','المسار','الشعبة','القاعة','رقم الطالب'],['','','','','','']]);
+ else if(a==='sc_exp')expRoster();else if(a==='sc_t2')dlCsv('قالب-جدول-الاختبارات.csv',[['التاريخ','الصف','المسار','المادة','النوع'],['','','','','']])});
 document.addEventListener('change',e=>{const i=e.target;if(i.id==='sc_logo'&&i.files[0]){const f=i.files[0],u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,360/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{localStorage.setItem('ctl_logo',c.toDataURL('image/png'));toast('تم حفظ الشعار… جارٍ إعادة التحميل',0);setTimeout(()=>location.reload(),900)}catch(er){alert('تعذر حفظ الشعار')}};im.onerror=()=>alert('تعذرت قراءة الصورة');im.src=u;return}
 if(i.id==='sc_f1'&&i.files[0])impStudents(i.files[0]);else if(i.id==='sc_f2'&&i.files[0])impSched(i.files[0])});
 window.openSetup=showSetup;
