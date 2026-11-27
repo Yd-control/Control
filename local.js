@@ -44,7 +44,7 @@ async function restore(d){
  localStorage.setItem('ctl_inited','1');
  if(d._full!==false||!d._local){await idbClear();if(r.docs.length)await idbPut(r.docs)}
  return Object.keys(r.ls).length}
-function pickFile(){return new Promise(res=>{const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=()=>res(f.files[0]||null);f.click()})}
+function pickFile(){return new Promise(res=>{const f=document.createElement('input');f.type='file';f.onchange=()=>res(f.files[0]||null);f.click()})}
 async function doRestore(msgEl){
  const f=await pickFile();if(!f)return;
  let d;try{d=JSON.parse(await f.text())}catch(e){msgEl.style.color='#dc2626';msgEl.textContent='تعذرت قراءة الملف';return}
