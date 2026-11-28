@@ -859,12 +859,19 @@ const WATER={on:false,n:[],buf:null,stop(){if(!this.on)return;this.on=false;try{
   const g=AC.createGain();g.gain.value=0;g.gain.setTargetAtTime(this.amb?.16:.8,AC.currentTime,.6);
   src.connect(g);g.connect(AC.destination);src.start();this.n=[src];this.g=g;this.on=true}catch(e){if(!this.er){this.er=1;try{toast('تعذر تشغيل الموسيقى: '+((e&&e.message)||e))}catch(x){}}}this.ld=false}};
 document.addEventListener('visibilitychange',()=>{try{if(!AC)return;if(document.hidden)AC.suspend();else if(sound&&!WATER.off)AC.resume()}catch(e){}});
+window.__rl=()=>{try{sessionStorage.setItem('ctl_rl','1')}catch(e){}location.reload()};
+let __rl0=false;try{__rl0=sessionStorage.getItem('ctl_rl')==='1';sessionStorage.removeItem('ctl_rl')}catch(e){}
+/* مراقب الصوت: يعيد تشغيل الموسيقى بعد أي انقطاع (نافذة الملفات، المشاركة، المكالمات، التبديل بين التطبيقات) */
+const audioKeep=()=>{try{if(!sound||WATER.off||document.hidden)return;if(!AC){return}if(AC.state!=='running'){AC.resume&&AC.resume().catch(()=>{})}if(!WATER.on&&!WATER.ld)WATER.start()}catch(e){}};
+setInterval(audioKeep,1500);['pageshow','focus','online'].forEach(ev=>window.addEventListener(ev,()=>setTimeout(audioKeep,200)));
+document.addEventListener('change',()=>setTimeout(audioKeep,300),true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(audioKeep,200)});
 let splDone=false;
 function endSpl(){if(splDone)return;splDone=true;try{if(WATER.on&&WATER.g)WATER.g.gain.setTargetAtTime(.16,AC.currentTime,1.2)}catch(e){}WATER.amb=true;const e=document.getElementById('spl');if(!e)return;e.classList.add('out');setTimeout(()=>e.remove(),700)}
 (function(){const k=document.getElementById('splk'),sb=document.getElementById('spls');if(k)k.addEventListener('click',endSpl);
  WATER.start();const kick=()=>{if(!sound||WATER.off)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume().then(()=>{if(!WATER.on)WATER.start()})}catch(e){}};['pointerdown','touchstart','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,kick,{capture:true,passive:true}));
  if(sb)sb.addEventListener('click',()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}WATER.on=false;WATER.start();sb.hidden=true});
- setTimeout(endSpl,SPLASH_MS)})();
+ if(__rl0)endSpl();else setTimeout(endSpl,SPLASH_MS)})();
 /* ===== إعداد المدرسة واستيراد البيانات ===== */
 const A2W=t=>String(t==null?'':t).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).trim();
 const DDM=()=>{const t=ymd(new Date()),e=new Date();e.setDate(e.getDate()+14);return [t,ymd(e)]};
@@ -908,7 +915,7 @@ function scRead(){
  const rooms=[],seen=new Set();for(const ln of $('#sc_rm').value.split('\n').map(x=>x.trim()).filter(Boolean)){const a=ln.split('|').map(x=>A2W(x));const k=a[0],g=+a[1],t=a[2]||tr[0];if(!k||!gr.includes(g)||!tr.includes(t))return m('قاعة غير صحيحة (الصف/المسار غير معرّف): '+ln);if(seen.has(k))return m('قاعة مكررة: '+k);seen.add(k);rooms.push({k,g,t})}
  return{name,ring:$('#sc_r').value.trim(),gender:$('#sc_g').value,year:$('#sc_y').value.trim(),term:$('#sc_t').value,director:$('#sc_dir').value.trim(),head:$('#sc_head').value.trim(),gr,tr,per,rooms,done:1}}
 async function scSave(){const v=scRead();if(!v)return;
- try{try{localStorage.setItem('ctl_school',JSON.stringify(v))}catch(e){}toast('تم الحفظ… جارٍ إعادة التحميل',0);setTimeout(()=>location.reload(),900)}
+ try{try{localStorage.setItem('ctl_school',JSON.stringify(v))}catch(e){}toast('تم الحفظ… جارٍ إعادة التحميل',0);setTimeout(()=>window.__rl(),900)}
  catch(e){$('#sc_m').textContent='تعذر الحفظ: '+(e&&e.message||e)}}
 /* ---- قراءة الملفات ---- */
 function csvParse(t){t=t.replace(/^﻿/,'');const first=t.split('\n')[0]||'',dl=[',',';','\t'].map(d=>[d,first.split(d).length]).sort((a,b)=>b[1]-a[1])[0][0];const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}else if(ch=='"')q=true;else if(ch==dl){r.push(c);c=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
@@ -965,10 +972,10 @@ async function impSched(f){const R=$('#sc_r');R.textContent='جارٍ القرا
   R.textContent='تمت إضافة '+add+' اختبارًا'+(bad.length?'\nتم تخطي '+bad.length+':\n'+bad.slice(0,8).join('\n'):'')}
  catch(e){R.textContent='تعذر الاستيراد: '+(e&&e.message||e)}}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;
- if(a==='sc_save')scSave();else if(a==='sc_logo0'){try{localStorage.removeItem('ctl_logo')}catch(er){}location.reload()}else if(a==='sc_rst'){window.ctlRestore&&window.ctlRestore($('#sc_m'))}else if(a==='sc_imp')showImport();
+ if(a==='sc_save')scSave();else if(a==='sc_logo0'){try{localStorage.removeItem('ctl_logo')}catch(er){}window.__rl()}else if(a==='sc_rst'){window.ctlRestore&&window.ctlRestore($('#sc_m'))}else if(a==='sc_imp')showImport();
  else if(a==='sc_t1')dlCsv('قالب-الطلاب.csv',[['الاسم','الصف','المسار','الشعبة','القاعة','رقم الطالب'],['','','','','','']]);
  else if(a==='sc_exp')expRoster();else if(a==='sc_t2')dlCsv('قالب-جدول-الاختبارات.csv',[['التاريخ','الصف','المسار','المادة','النوع'],['','','','','']])});
-document.addEventListener('change',e=>{const i=e.target;if(i.id==='sc_logo'&&i.files[0]){const f=i.files[0],u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,360/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{localStorage.setItem('ctl_logo',c.toDataURL('image/png'));toast('تم حفظ الشعار… جارٍ إعادة التحميل',0);setTimeout(()=>location.reload(),900)}catch(er){alert('تعذر حفظ الشعار')}};im.onerror=()=>alert('تعذرت قراءة الصورة');im.src=u;return}
+document.addEventListener('change',e=>{const i=e.target;if(i.id==='sc_logo'&&i.files[0]){const f=i.files[0],u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,360/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{localStorage.setItem('ctl_logo',c.toDataURL('image/png'));toast('تم حفظ الشعار… جارٍ إعادة التحميل',0);setTimeout(()=>window.__rl(),900)}catch(er){alert('تعذر حفظ الشعار')}};im.onerror=()=>alert('تعذرت قراءة الصورة');im.src=u;return}
 if(i.id==='sc_f1'&&i.files[0])impStudents(i.files[0]);else if(i.id==='sc_f2'&&i.files[0])impSched(i.files[0])});
 window.openSetup=showSetup;
 if(SC){const n=$('#scn');if(n)n.textContent='جدول اختبارات '+SC.term+' '+SC.year+' (الصفوف '+GR.join('، ')+').'}

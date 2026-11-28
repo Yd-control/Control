@@ -64,7 +64,7 @@ async function doRestore(msgEl){
  const f=await pickFile();if(!f)return;
  let d;try{d=JSON.parse(await f.text())}catch(e){msgEl.style.color='#dc2626';msgEl.textContent='تعذرت قراءة الملف';return}
  if(!confirm('سيحل هذا الملف محل البيانات الموجودة على هذا الجهاز. متابعة؟'))return;
- try{const n=await restore(d);msgEl.style.color='#059669';msgEl.textContent='تم الاسترجاع… جارٍ إعادة التحميل';setTimeout(()=>location.reload(),900)}
+ try{const n=await restore(d);msgEl.style.color='#059669';msgEl.textContent='تم الاسترجاع… جارٍ إعادة التحميل';setTimeout(()=>(window.__rl?window.__rl():location.reload()),900)}
  catch(e){msgEl.style.color='#dc2626';msgEl.textContent=e.message||String(e)}}
 window.ctlRestore=doRestore;
 /* ---------- لوحة الإعدادات ---------- */
@@ -104,7 +104,7 @@ document.addEventListener('click',async ev=>{
  const bb=ev.target.closest&&ev.target.closest('#bkb [data-b]');if(bb){const a=bb.dataset.b,bar=$('#bkb');if(a==='go'){bar.style.display='none';if(await saveBackup(true))bar.style.display='none'}else{W('ctl_snooze',Date.now());bar.style.display='none'}return}
  const t=ev.target.closest&&ev.target.closest('#adm [data-u]');if(!t)return;const a=t.dataset.u,m=()=>$('#um');
  if(a==='x')adm().style.display='none';
- else if(a==='dd'){const n=dedupe();$('#um3').textContent=n?('تمت إزالة '+n+' تكرار، جارٍ التحديث…'):'لا توجد تكرارات.';if(n)setTimeout(()=>location.reload(),900)}
+ else if(a==='dd'){const n=dedupe();$('#um3').textContent=n?('تمت إزالة '+n+' تكرار، جارٍ التحديث…'):'لا توجد تكرارات.';if(n)setTimeout(()=>(window.__rl?window.__rl():location.reload()),900)}
  else if(a==='su'){adm().style.display='none';window.openSetup&&window.openSetup()}
  else if(a==='bf'||a==='bl'){m().style.color='#059669';m().textContent='جارٍ التجهيز…';try{const ok=await saveBackup(a==='bf');m().textContent=ok?'تم تجهيز النسخة. احفظها في «الملفات» أو أرسلها لنفسك':'';if(ok)setTimeout(panel,1500)}catch(er){m().style.color='#dc2626';m().textContent='تعذر الحفظ: '+(er&&er.message||er)}}
  else if(a==='rs')doRestore(m());
@@ -119,7 +119,7 @@ document.addEventListener('click',async ev=>{
    setTimeout(()=>{window.__fresh=false;window.openSetup&&window.openSetup();renderToday();renderCats()},700)}
   catch(er){m().style.color='#dc2626';m().textContent='تعذر التصفير: '+(er&&er.message||er)}}
  else if(a==='wp'){if(!confirm('سيُحذف كل شيء على هذا الجهاز (الطلاب والغياب والصور والإعدادات) ولا يمكن التراجع. هل حفظت نسخة احتياطية؟'))return;if(!confirm('تأكيد أخير: مسح كل البيانات؟'))return;
-  Object.keys(localStorage).filter(k=>k.indexOf('ctl_')===0).forEach(k=>localStorage.removeItem(k));try{await idbClear()}catch(x){}location.reload()}
+  Object.keys(localStorage).filter(k=>k.indexOf('ctl_')===0).forEach(k=>localStorage.removeItem(k));try{await idbClear()}catch(x){}(window.__rl?window.__rl():location.reload())}
 });
 /* ---------- تذكير النسخ الاحتياطي ---------- */
 function remind(){
