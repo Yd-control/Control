@@ -81,7 +81,7 @@ function vPlan(){
  <details><summary>مراحل الحصة (${c.dur} دقيقة)</summary><div>${PH.map((p,i)=>`<div class="it"><b>${i+1}. ${p[1]}</b> <span class="tag">${mins[i]} د</span>${fld('ph.'+i+'.t','إجراء المعلم','',1)}${fld('ph.'+i+'.l','نشاط المتعلم')}${fld('ph.'+i+'.s','الاستراتيجية')}${fld('ph.'+i+'.q','سؤال محوري')}${fld('ph.'+i+'.e','دليل النجاح')}</div>`).join('')}</div></details>
  <details><summary>التقويم والدعم</summary><div>${fld('as.d','التقييم القبلي','',1)}${fld('as.f','التقييم التكويني','',1)}${fld('as.p','مهمة أداء')}${fld('as.w','نشاط كتابي')}${fld('as.q','اختبار قصير')}${fld('as.s','التقييم التحصيلي')}${fld('lang','دعم اللغة','',1)}${fld('diff','التدريس المتمايز','',1)}${fld('hw','الواجب المنزلي','',1)}${fld('support','الطلبة المستهدفون والدعم (أصحاب الهمم والموهوبون)','',1)}<label class="l">ترتيب جلوس الطلبة</label><select data-k="seat"><option value=""></option>${OPT.seatingArrangement.map(o=>`<option ${c.seat===o?'selected':''}>${o}</option>`).join('')}</select>${fld('refl','سؤال التأمل بعد التنفيذ','',1)}${fld('next','الخطوة التالية','',1)}</div></details>
  <div class="card"><h2>✨ تحضير بالذكاء الاصطناعي (اختياري)</h2><p class="mu">يجهّز نصاً من بيانات الدرس الأساسية، تلصقه في Claude أو Gemini أو ChatGPT، ثم تعيد الرد هنا فتُملأ الخانات. لا يُرسل التطبيق شيئاً بنفسه.</p><div class="row"><button class="btn" data-ai>✨ تجهيز النص</button><button class="btn g" data-aipaste>📥 لصق رد الذكاء الاصطناعي</button></div></div>
- <div class="card"><div class="row"><button class="btn" data-word>📘 تصدير Word</button><button class="btn g" data-pdf>📄 PDF / طباعة</button></div><button class="btn g" data-save style="width:100%">💾 حفظ الخطة</button><p class="mu">ملف Word يملأ قالب الوزارة نفسه. وفي ملف PDF اختر «حفظ في الملفات» من قائمة المشاركة.</p></div>`}
+ <div class="card"><div class="row"><button class="btn" data-word>📘 تصدير Word</button><button class="btn g" data-pdf>📄 PDF / طباعة</button></div><button class="btn g" data-save style="width:100%">💾 حفظ الخطة</button><button class="btn g" data-back style="width:100%;margin-top:8px">← رجوع إلى الخطط</button><p class="mu">ملف Word يملأ قالب الوزارة نفسه. وفي ملف PDF اختر «حفظ في الملفات» من قائمة المشاركة.</p></div>`}
 function vSoon(t,d){return `<div class="card"><h2>${t}</h2><p class="mu">${d}</p><p class="mu">هذا القسم قيد البناء، وسيأتي في المرحلة التالية.</p></div>`}
 function render(){nav();$('#m').innerHTML=tab==='plan'?vPlan():tab==='test'?vSoon('📄 الاختبارات','إعداد الأسئلة وتصدير ورقة الاختبار Word وPDF.'):vSoon('🤝 الخطة العلاجية وأصحاب الهمم','الخطة العلاجية الفردية وتكييفات أصحاب الهمم.')}
 document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k&&cur){setv(k,e.target.value)}});
@@ -89,14 +89,14 @@ document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.
  if(t.dataset&&t.dataset.k==='dur'&&cur){render()}});
 function persist(){if(!cur)return;const i=plans.findIndex(p=>p.id===cur.id);cur.ts=Date.now();if(i<0)plans.push(cur);else plans[i]=cur;SV('ms_zone_plans',plans);SV('ms_zone_prof',{teacher:cur.teacher,subject:cur.subject})}
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
- if(d.new!=null){cur=blank();render();scrollTo(0,0)}
- else if(d.open){cur=JSON.parse(JSON.stringify(plans.find(p=>p.id===d.open)));render();scrollTo(0,0)}
+ if(d.new!=null){cur=blank();history.pushState({z:1},'');render();scrollTo(0,0)}
+ else if(d.open){cur=JSON.parse(JSON.stringify(plans.find(p=>p.id===d.open)));history.pushState({z:1},'');render();scrollTo(0,0)}
  else if(d.dup){const p=JSON.parse(JSON.stringify(plans.find(p=>p.id===d.dup)));p.id=uid();p.title+=' (نسخة)';plans.push(p);SV('ms_zone_plans',plans);render()}
  else if(d.del){if(confirm('حذف الخطة؟')){plans=plans.filter(p=>p.id!==d.del);SV('ms_zone_plans',plans);render()}}
- else if(d.back!=null){persist();cur=null;render()}
+ else if(d.back!=null){if(history.state&&history.state.z===1)history.back();else{persist();cur=null;render();scrollTo(0,0)}}
  else if(d.save!=null){persist();alert('تم حفظ الخطة')}
  else if(d.word!=null){persist();try{await exportWord(cur)}catch(err){console.error(err);alert('تعذر إنشاء ملف Word: '+(err&&err.message||err))}}
- else if(d.pdf!=null){persist();showPrint(cur)}
+ else if(d.pdf!=null){persist();history.pushState({z:2},'');showPrint(cur)}
  else if(d.ai!=null)aiDialog();
  else if(d.aipaste!=null)aiPaste();
  else if(d.aiapp){const tx=aiPrompt(cur);let ok=false;try{await navigator.clipboard.writeText(tx);ok=true}catch(e){}if(!ok){const ta=$('#aitx');if(ta){ta.select();try{document.execCommand('copy');ok=true}catch(e){}}}alert(ok?'تم نسخ النص. الصقه في محادثة '+b.dataset.nm+' (اضغط مطولاً ثم «لصق»).':'تعذر النسخ تلقائياً. حدد النص بالأسفل وانسخه يدوياً.');window.open(d.aiapp,'_blank')}
@@ -186,10 +186,12 @@ function classText(p){return [p.grade?'الصف '+p.grade:'',p.track,p.section?'
 function fmtDate(v){if(!v)return'____________';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:'____________'}
 function seq(p){const mins=MIN[p.dur]||MIN[45];let el=0;const out=[];PH.forEach((ph,i)=>{const x=p.ph[i],s=el,e=el+mins[i];el=e;out.push(`${s}–${e} د — ${ph[1]}: ${cp(x.t,70)}\nمتعلم: ${cp(x.l,50)}؛ استراتيجية: ${cp(x.s,35)}؛ سؤال: ${cp(x.q,55)}؛ دليل: ${cp(x.e,45)}`)});return{text:out.join('\n'),total:el,split:mins.join(' + ')}}
 /* ===== PDF / طباعة ===== */
+function closePv(){if(history.state&&history.state.z===2)history.back();else document.getElementById('pv').style.display='none'}
+window.addEventListener('popstate',()=>{const pv=document.getElementById('pv');if(pv.style.display==='block'){pv.style.display='none';return}if(cur){persist();cur=null;render();scrollTo(0,0)}});
 function showPrint(p){const mins=MIN[p.dur]||MIN[45],sq=seq(p);
  const ck=k=>`<tr><th>${OPTN[k]}</th><td>${OPT[k].map(o=>((p.chk[k]||[]).includes(o)?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>`;
  const nl=s=>esc(s).replace(/\n/g,'<br>');
- $('#pv').innerHTML=`<div class="bar"><button class="btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button><button class="btn g" onclick="document.getElementById('pv').style.display='none'">إغلاق</button></div>
+ $('#pv').innerHTML=`<div class="bar"><button class="btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button><button class="btn g" onclick="closePv()">← رجوع للخطة</button></div>
  <h1>قالب تخطيط الدرس اليومي — ${esc(p.subject)} — ${esc(p.title)}</h1><div class="m">المادة: ${esc(p.subject)} | الصف: ${esc(classText(p))} | التاريخ: ${fmtDate(p.date)} | المعلم: ${esc(p.teacher)} | مدة الحصة: ${p.dur} دقيقة</div>
  <table><tr><th style="width:22%">عنوان الوحدة</th><td colspan="3">${esc(p.unit||p.title)}</td></tr>
  <tr><th>عنوان القسم</th><td colspan="3">${esc(p.secTitle||p.title)}</td></tr><tr><th>الموارد</th><td colspan="3">${nl(p.resources)}</td></tr><tr><th>المواد والأدوات</th><td colspan="3">${nl(p.materials)}</td></tr>
