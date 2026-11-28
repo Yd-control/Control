@@ -29,9 +29,9 @@ nav button{flex:1;border:0;background:none;color:var(--mu);font:inherit;font-siz
 .bx{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}.bx>div{background:var(--c1);width:100%;max-width:760px;border-radius:22px 22px 0 0;padding:18px;max-height:90vh;overflow:auto}
 #pv{position:fixed;inset:0;background:#fff;color:#000;z-index:30;overflow:auto;padding:12px;display:none}
 #pv .bar{position:sticky;top:0;background:#fff;padding:6px 0;display:flex;gap:8px;z-index:2}
-#pv table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}#pv td,#pv th{border:1px solid #444;padding:5px 7px;vertical-align:top;text-align:right}#pv th{background:#e8edf7}
+#pv table{width:100%;table-layout:fixed;word-break:break-word;border-collapse:collapse;margin:10px 0;font-size:13px}#pv td,#pv th{border:1px solid #444;padding:5px 7px;vertical-align:top;text-align:right}#pv th{background:#e8edf7}#pv table:not(.ph) th:first-child{width:22%}
 #pv h1,#pv h2{text-align:center;margin:6px 0}#pv h1{font-size:18px}#pv h2{font-size:15px}#pv .m{text-align:center;font-size:12px}
-@media print{body>*:not(#pv){display:none!important}#pv{position:static;display:block!important;padding:0}#pv .bar{display:none}@page{size:A4;margin:12mm}}
+@media print{html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0!important}body>*:not(#pv){display:none!important}#pv{position:static;display:block!important;padding:0}#pv .bar{display:none}@page{size:A4;margin:12mm}}
 </style></head><body>
 <header><a class="ib" href="home.html">← مدرستي</a><div class="t"><b>my zone</b><small>مساحة المعلم · محلي على جهازك</small></div><button class="ib" id="thm">☀️</button></header>
 <main id="m"></main>
@@ -189,7 +189,7 @@ function seq(p){const mins=MIN[p.dur]||MIN[45];let el=0;const out=[];PH.forEach(
 function closePv(){if(history.state&&history.state.z===2)history.back();else document.getElementById('pv').style.display='none'}
 window.addEventListener('popstate',()=>{const pv=document.getElementById('pv');if(pv.style.display==='block'){pv.style.display='none';return}if(cur){persist();cur=null;render();scrollTo(0,0)}});
 function showPrint(p){const mins=MIN[p.dur]||MIN[45],sq=seq(p);
- const ck=k=>`<tr><th>${OPTN[k]}</th><td>${OPT[k].map(o=>((p.chk[k]||[]).includes(o)?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>`;
+ const ck=k=>`<tr><th>${OPTN[k]}</th><td colspan="3">${OPT[k].map(o=>((p.chk[k]||[]).includes(o)?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>`;
  const nl=s=>esc(s).replace(/\n/g,'<br>');
  $('#pv').innerHTML=`<div class="bar"><button class="btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button><button class="btn g" onclick="closePv()">← رجوع للخطة</button></div>
  <h1>قالب تخطيط الدرس اليومي — ${esc(p.subject)} — ${esc(p.title)}</h1><div class="m">المادة: ${esc(p.subject)} | الصف: ${esc(classText(p))} | التاريخ: ${fmtDate(p.date)} | المعلم: ${esc(p.teacher)} | مدة الحصة: ${p.dur} دقيقة</div>
@@ -198,9 +198,9 @@ function showPrint(p){const mins=MIN[p.dur]||MIN[45],sq=seq(p);
  <tr><th>نواتج التعلم</th><td colspan="3">${nl(bl(p.outcomes))}</td></tr><tr><th>المعرفة السابقة</th><td colspan="3">${nl(p.prior)}</td></tr>
  <tr><th>الأهداف</th><td colspan="3">${nl(bl(p.objectives))}</td></tr><tr><th>المفاهيم الخاطئة</th><td colspan="3">${nl(p.misc)}</td></tr><tr><th>المفردات</th><td colspan="3">${nl(p.vocab)}</td></tr>
  ${Object.keys(OPTN).map(ck).join('')}<tr><th>الربط بالإمارات</th><td colspan="3">${nl(p.uae)}</td></tr></table>
- <h2>خطة الحصة الدراسية</h2><table><tr><th>الأسئلة الرئيسة</th><td>${nl(bl(p.questions))}</td></tr>
- <tr><th>مراحل الحصة (المدة ${sq.total} دقيقة: ${sq.split})</th><td><table><tr><th>الوقت</th><th>المرحلة</th><th>المعلم</th><th>المتعلم</th><th>الاستراتيجية</th><th>السؤال</th><th>دليل النجاح</th></tr>${PH.map((ph,i)=>{const x=p.ph[i],s=mins.slice(0,i).reduce((a,b)=>a+b,0);return `<tr><td>${s}–${s+mins[i]} د</td><td>${ph[1]}</td><td>${nl(x.t)}</td><td>${nl(x.l)}</td><td>${nl(x.s)}</td><td>${nl(x.q)}</td><td>${nl(x.e)}</td></tr>`}).join('')}</table></td></tr>
- <tr><th>التقييم</th><td>التقييم القبلي: ${nl(p.as.d)}<br>التكويني: ${nl(p.as.f)}<br>مهمة أداء: ${esc(p.as.p)}<br>نشاط كتابي: ${esc(p.as.w)}<br>اختبار قصير: ${esc(p.as.q)}<br>التحصيلي: ${esc(p.as.s)}</td></tr>
+ <h2>خطة الحصة الدراسية</h2><table><tr><th style="width:22%">الأسئلة الرئيسة</th><td>${nl(bl(p.questions))}</td></tr></table>
+ <h2 style="font-size:13px">مراحل الحصة (المدة ${sq.total} دقيقة: ${sq.split})</h2><table class="ph"><tr><th style="width:11%">الوقت</th><th style="width:12%">المرحلة</th><th>المعلم</th><th>المتعلم</th><th style="width:11%">الاستراتيجية</th><th style="width:14%">السؤال</th><th style="width:14%">دليل النجاح</th></tr>${PH.map((ph,i)=>{const x=p.ph[i],s=mins.slice(0,i).reduce((a,b)=>a+b,0);return `<tr><td>${s}–${s+mins[i]} د</td><td>${ph[1]}</td><td>${nl(x.t)}</td><td>${nl(x.l)}</td><td>${nl(x.s)}</td><td>${nl(x.q)}</td><td>${nl(x.e)}</td></tr>`}).join('')}</table>
+ <table><tr><th>التقييم</th><td>التقييم القبلي: ${nl(p.as.d)}<br>التكويني: ${nl(p.as.f)}<br>مهمة أداء: ${esc(p.as.p)}<br>نشاط كتابي: ${esc(p.as.w)}<br>اختبار قصير: ${esc(p.as.q)}<br>التحصيلي: ${esc(p.as.s)}</td></tr>
  <tr><th>دعم اللغة</th><td>${nl(p.lang)}</td></tr><tr><th>التدريس المتمايز</th><td>${nl(p.diff)}</td></tr><tr><th>الواجب المنزلي</th><td>${nl(p.hw)}</td></tr>
  <tr><th>الطلبة المستهدفون والدعم</th><td>${nl(p.support)}</td></tr><tr><th>ترتيب الجلوس</th><td>${OPT.seatingArrangement.map(o=>(p.seat===o?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>
  <tr><th>التأمل الذاتي والخطوة التالية</th><td>${nl(p.refl)}<br>الخطوة التالية: ${nl(p.next)}</td></tr></table>`;
@@ -246,6 +246,10 @@ function setCell(tc,text,align){let ps=cellParas(tc);if(!ps.length){tc.appendChi
  const tp=kid(tc,'tcPr')||tc.insertBefore(E('tcPr'),tc.firstChild);ordIns(tp,E('vAlign',{val:'top'}),TORD)}
 function appendCell(tc,text,align){const p=E('p');tc.appendChild(p);setPara(p,text,align);return p}
 function compactCell(tc,size){cellParas(tc).forEach(p=>{const pp=gp(p);ordIns(pp,E('spacing',{before:'0',after:'0',line:'240',lineRule:'auto'}),PORD);kids(p,'r').forEach(r=>{const rp=grp(r);ordIns(rp,E('sz',{val:String(Math.round(size*2))}),RORD);ordIns(rp,E('szCs',{val:String(Math.round(size*2))}),RORD)})})}
+function sp(tc,text,o){o=o||{};const p=appendCell(tc,text,'right');const pp=gp(p);ordIns(pp,E('spacing',{before:'0',after:String(o.after||0),line:'252',lineRule:'auto'}),PORD);kids(p,'r').forEach(r=>{const rp=grp(r);if(o.bold){ordIns(rp,E('b'),RORD);ordIns(rp,E('bCs'),RORD)}const z=String(Math.round((o.size||10)*2));ordIns(rp,E('sz',{val:z}),RORD);ordIns(rp,E('szCs',{val:z}),RORD)});return p}
+function phaseBlock(tc,p){const mins=MIN[p.dur]||MIN[45];let el=0;PH.forEach((ph,i)=>{const x=p.ph[i],s0=el;el+=mins[i];sp(tc,`${s0}–${el} د — ${ph[1]}`,{bold:true,size:10,after:0});
+ sp(tc,'المعلم: '+cp(x.t,110),{size:9.5});sp(tc,'المتعلم: '+cp(x.l,90),{size:9.5});sp(tc,'الاستراتيجية: '+cp(x.s,40)+'  |  السؤال: '+cp(x.q,70),{size:9.5});sp(tc,'دليل النجاح: '+cp(x.e,70),{size:9.5,after:i<4?100:0})})}
+function normCell(tc,size){cellParas(tc).forEach(p=>{const pp=gp(p);if(!kid(pp,'spacing'))ordIns(pp,E('spacing',{before:'0',after:'20',line:'252',lineRule:'auto'}),PORD);kids(p,'r').forEach(r=>{const rp=grp(r);const z=String(Math.round(size*2));ordIns(rp,E('sz',{val:z}),RORD);ordIns(rp,E('szCs',{val:z}),RORD)})})}
 function gridOf(tbl){const rows=kids(tbl,'tr'),g=[];rows.forEach((tr,ri)=>{const row=[];let i=0;kids(tr,'tc').forEach(tc=>{const tp=kid(tc,'tcPr'),gs=tp&&kid(tp,'gridSpan'),span=gs?+gs.getAttributeNS(WN,'val'):1,vm=tp&&kid(tp,'vMerge');let cell=tc;if(vm&&vm.getAttributeNS(WN,'val')!=='restart'&&ri>0&&g[ri-1][i])cell=g[ri-1][i];for(let k=0;k<span;k++)row[i++]=cell});g.push(row)});return{rows,g}}
 function markChecks(row,selected){const sel=selected.map(plain).filter(Boolean);new Set(row).forEach(tc=>{cellParas(tc).forEach(p=>{const t=plain(ptext(p));if(!t.includes('☐'))return;const opt=plain(t.replace('☐',''));if(sel.some(v=>v===opt||opt.includes(v)||v.includes(opt)))setPara(p,ptext(p).replace('☐','☑'),'right')})})}
 function labeled(tc,entries){const found=new Set();cellParas(tc).forEach(p=>{const cur=plain(ptext(p));for(const [k,v] of entries){if(cur.startsWith(k)){if(found.has(k))tc.removeChild(p);else{setPara(p,`${k}: ${v||'—'}`,'right');found.add(k)}break}}});entries.forEach(([k,v])=>{if(!found.has(k))appendCell(tc,`${k}: ${v||'—'}`,'right')})}
@@ -273,28 +277,29 @@ async function exportWord(p){
  setCell(O[1][5],compact(p.resources,240));
  setCell(O[2][5],compact(p.materials,200));
  setCell(sg[0][0],'خطة الحصة الدراسية — الحصة 1 من 1','center');
- setCell(sg[1][1],compact(bl(p.questions),160));compactCell(sg[1][1],10);
+ setCell(sg[1][1],compact(bl(p.questions),160));normCell(sg[1][1],10);
  const strat=[...new Set(p.ph.map(x=>plain(x.s)).filter(Boolean))].join('، ');
  appendCell(sg[2][0],'الاستراتيجيات المختارة: '+cp(strat,120));
- appendCell(sg[2][1],'المراحل الخمس: التهيئة، الاستقصاء، النمذجة، التطبيق والممارسة، والتقويم الختامي.');compactCell(sg[2][1],9);
+ appendCell(sg[2][1],'المراحل الخمس: التهيئة، الاستقصاء، النمذجة، التطبيق والممارسة، والتقويم الختامي.');normCell(sg[2][1],10);
  setCell(sg[2][3],`المدة الكلية: ${sq.total} دقيقة\nتوزيع المراحل: ${sq.split} دقيقة`);
- labeled(sg[3][1],[['التقييم القبلي',cp(p.as.d,70)],['التقييم التكويني',cp(p.as.f,70)],['مهمة أداء',cp(p.as.p,75)],['نشاط كتابي',cp(p.as.w,65)],['اختبار قصير',cp(p.as.q,65)],['التقييم التحصيلي',cp(p.as.s,75)]]);compactCell(sg[3][1],8.5);
+ labeled(sg[3][1],[['التقييم القبلي',cp(p.as.d,70)],['التقييم التكويني',cp(p.as.f,70)],['مهمة أداء',cp(p.as.p,75)],['نشاط كتابي',cp(p.as.w,65)],['اختبار قصير',cp(p.as.q,65)],['التقييم التحصيلي',cp(p.as.s,75)]]);normCell(sg[3][1],9.5);cellParas(sg[3][1]).slice(1).forEach(p=>kids(p,'r').forEach(r=>{const rp=grp(r);['b','bCs'].forEach(n=>kids(rp,n).forEach(x=>rp.removeChild(x)))}));
  appendCell(sg[4][1],'تطبيقات دعم اللغة:\n'+cp(p.lang,100));appendCell(sg[5][1],'التمايز المقترح:\n'+cp(p.diff,120));setCell(sg[6][1],cp(p.hw,90));
- [4,5,6].forEach(i=>compactCell(sg[i][1],10));
+ [4,5,6].forEach(i=>normCell(sg[i][1],10));
  setCell(lg[0][0],'خطة الحصة الدراسية — الحصة 1 من 1','center');
  setCell(lg[1][1],cp(p.ph[3].q,90));
  appendCell(lg[2][0],'الاستراتيجيات المختارة: '+cp(strat,120));
- appendCell(lg[2][1],'خطوات الحصة بالتوقيت:\n'+sq.text);compactCell(lg[2][1],9);
+ phaseBlock(lg[2][1],p);
  setCell(lg[2][3],`المدة الكلية: ${sq.total} دقيقة\nتوزيع المراحل: ${sq.split} دقيقة`);
- appendCell(lg[7][1],'هدف التيسير لأصحاب الهمم:\n'+cp(p.support,170));compactCell(lg[7][1],8.5);
+ appendCell(lg[7][1],'هدف التيسير لأصحاب الهمم:\n'+cp(p.support,170));normCell(lg[7][1],10);
  markChecks(lg[8],[p.seat||'']);
- setCell(lg[9][1],`تأمل بعد التنفيذ: ${cp(p.refl,100)}\nالخطوة التالية: ${cp(p.next,100)}`);compactCell(lg[9][1],10);
+ {const th=kid(kid(L.rows[8],'trPr'),'trHeight');if(th)th.setAttributeNS(WN,'w:val','900')}
+ setCell(lg[9][1],`تأمل بعد التنفيذ: ${cp(p.refl,100)}\nالخطوة التالية: ${cp(p.next,100)}`);normCell(lg[9][1],10);
  // إزالة الصفوف المكررة
  sg.slice(7,10).map(r=>r[0]).forEach((_,i)=>{const tr=S.rows[7+i];if(tr&&tr.parentNode)tr.parentNode.removeChild(tr)});
  L.rows.slice(3,7).forEach(tr=>tr.parentNode&&tr.parentNode.removeChild(tr));
  {let on=false;[...body.childNodes].forEach(n=>{if(n===tbls[1]){on=true;return}if(n===tbls[2])on=false;if(on&&n.nodeType===1&&n.localName==='p')body.removeChild(n)});
   const sp=E('p'),sp2=gp(sp);sp2.appendChild(E('spacing',{before:'0',after:'0',line:'20',lineRule:'exact'}));const sr=E('r'),srp=E('rPr');srp.appendChild(E('sz',{val:'2'}));sr.appendChild(srp);sp.appendChild(sr);body.insertBefore(sp,tbls[2]);
-  const fp=cellParas(gridOf(tbls[2]).g[0][0])[0];ordIns(gp(fp),E('pageBreakBefore'),PORD)}
+  const fp=cellParas(gridOf(tbls[2]).g[0][0])[0];ordIns(gp(fp),E('pageBreakBefore'),PORD);const fp1=cellParas(gridOf(tbls[1]).g[0][0])[0];ordIns(gp(fp1),E('pageBreakBefore'),PORD)}
  let after=false;[...body.childNodes].forEach(n=>{if(n===tbls[2]){after=true;return}if(after&&n.nodeType===1&&n.localName==='p'&&!ptext(n).trim()&&!n.getElementsByTagNameNS(WN,'br').length)body.removeChild(n)});
  let xml=new XMLSerializer().serializeToString(XD);if(!xml.startsWith('<?xml'))xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+xml;
  const FONT='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial" w:cs="Arial"/>';
