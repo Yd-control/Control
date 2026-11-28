@@ -299,8 +299,13 @@ async function exportWord(p){
  L.rows.slice(3,7).forEach(tr=>tr.parentNode&&tr.parentNode.removeChild(tr));
  {let on=false;[...body.childNodes].forEach(n=>{if(n===tbls[1]){on=true;return}if(n===tbls[2])on=false;if(on&&n.nodeType===1&&n.localName==='p')body.removeChild(n)});
   const sp=E('p'),sp2=gp(sp);sp2.appendChild(E('spacing',{before:'0',after:'0',line:'20',lineRule:'exact'}));const sr=E('r'),srp=E('rPr');srp.appendChild(E('sz',{val:'2'}));sr.appendChild(srp);sp.appendChild(sr);body.insertBefore(sp,tbls[2]);
-  const fp=cellParas(gridOf(tbls[2]).g[0][0])[0];ordIns(gp(fp),E('pageBreakBefore'),PORD);const fp1=cellParas(gridOf(tbls[1]).g[0][0])[0];ordIns(gp(fp1),E('pageBreakBefore'),PORD)}
+  }
  let after=false;[...body.childNodes].forEach(n=>{if(n===tbls[2]){after=true;return}if(after&&n.nodeType===1&&n.localName==='p'&&!ptext(n).trim()&&!n.getElementsByTagNameNS(WN,'br').length)body.removeChild(n)});
+ /* عكس ترتيب الأعمدة فعلياً بدل bidiVisual (لا يدعمه معاينة iOS) */
+ [0,1,2].forEach(i=>{const t=tbls[i],tp=kid(t,'tblPr');if(tp){kids(tp,'bidiVisual').forEach(x=>tp.removeChild(x));kids(tp,'tblInd').forEach(x=>tp.removeChild(x))}
+  const gr=kid(t,'tblGrid');if(gr){const g=kids(gr,'gridCol');g.reverse().forEach(x=>gr.appendChild(x))}
+  kids(t,'tr').forEach(tr=>{const c=kids(tr,'tc');c.reverse().forEach(x=>tr.appendChild(x))})
+  if(i>0){const f=cellParas(kids(kids(t,'tr')[0],'tc')[0])[0];if(f)ordIns(gp(f),E('pageBreakBefore'),PORD)}});
  let xml=new XMLSerializer().serializeToString(XD);if(!xml.startsWith('<?xml'))xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+xml;
  const FONT='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial" w:cs="Arial"/>';
  const fix=s=>s.replace(/<w:rFonts\b[^>]*?\/>/g,FONT);
