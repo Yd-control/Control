@@ -306,6 +306,9 @@ async function exportWord(p,direct){
   const gr=kid(t,'tblGrid');if(gr){const g=kids(gr,'gridCol');g.reverse().forEach(x=>gr.appendChild(x))}
   kids(t,'tr').forEach(tr=>{const c=kids(tr,'tc');c.reverse().forEach(x=>tr.appendChild(x))})
   if(i>0){const f=cellParas(kids(kids(t,'tr')[0],'tc')[0])[0];if(f)ordIns(gp(f),E('pageBreakBefore'),PORD)}});
+ /* iOS يحاذي النص فعلياً (يمين=يمين) ويتجاهل اتجاه الفقرة: نلغي bidi ونحاذي يميناً، ونفرض اتجاه RTL داخل النص بعلامة تضمين RLE...PDF */
+ [0,1,2].forEach(i=>{[...tbls[i].getElementsByTagNameNS(WN,'p')].forEach(p=>{const pp=gp(p);kids(pp,'bidi').forEach(x=>pp.removeChild(x));const j=kid(pp,'jc');const v=j&&j.getAttributeNS(WN,'val');if(v!=='center'){if(j)pp.removeChild(j);ordIns(pp,E('jc',{val:'right'}),PORD)}
+  {const segs=[[]];[...p.getElementsByTagNameNS(WN,'*')].forEach(n=>{if(n.localName==='br')segs.push([]);else if(n.localName==='t')segs[segs.length-1].push(n)});const all=segs.flat().map(t=>t.textContent).join('');if(/[\u0600-\u06FF]/.test(all))segs.forEach(sg=>{if(!sg.length)return;sg.forEach(t=>t.setAttribute('xml:space','preserve'));sg[0].textContent='\u202B'+sg[0].textContent;const l=sg[sg.length-1];l.textContent=l.textContent+'\u202C'})}})});
  let xml=new XMLSerializer().serializeToString(XD);if(!xml.startsWith('<?xml'))xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+xml;
  const FONT='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial" w:cs="Arial"/>';
  const fix=s=>s.replace(/<w:rFonts\b[^>]*?\/>/g,FONT);
