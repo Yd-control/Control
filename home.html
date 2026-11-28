@@ -72,7 +72,7 @@ const idbSet=async(k,v)=>{const d=await idb();return new Promise((ok,no)=>{const
 async function saveFile(name,text,type){const f=new File([text],name,{type:type||'application/json'});
  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500)}
-function pickFile(accept){return new Promise(res=>{const i=document.createElement('input');i.type='file';if(accept)i.accept=accept;i.onchange=()=>res(i.files[0]||null);i.click()})}
+function pickFile(accept){return new Promise(res=>{const i=document.createElement('input');i.type='file';if(accept)i.accept=accept;i.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';document.body.appendChild(i);const go=()=>{const f=i.files&&i.files[0];if(f){res(f);setTimeout(()=>i.remove(),60000)}};i.addEventListener('change',go);i.addEventListener('input',go);i.click()})}
 function modal(h){const b=document.createElement('div');b.className='bx';b.innerHTML='<div>'+h+'<button class="btn g" style="width:100%;margin-top:10px" data-x>إغلاق</button></div>';b.onclick=e=>{if(e.target===b||e.target.dataset.x!=null)b.remove()};document.body.appendChild(b);return b}
 /* ===== التنقل ===== */
 const TABS=[['home','الرئيسية','🏠'],['ag','الأجندة','📅'],['sc','الجداول','🗓️'],['wd','عالمي','🌐'],['lab','مختبري','🧪']];
