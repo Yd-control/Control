@@ -69,7 +69,7 @@ async function doRestore(msgEl){
 window.ctlRestore=doRestore;
 /* ---------- لوحة الإعدادات ---------- */
 const css=document.createElement('style');
-css.textContent=`#adm{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;padding:16px;overflow:auto}
+css.textContent=`#adm{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 16px;overflow:auto;-webkit-overflow-scrolling:touch}#adm .hd{position:sticky;top:-18px;z-index:2;background:var(--card);margin:-18px -18px 0;padding:14px 18px;border-radius:22px 22px 0 0;border-bottom:1px solid rgba(128,128,128,.25)}
 #adm .bx{background:var(--card);color:var(--tx);border-radius:22px;padding:18px;width:100%;max-width:460px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #adm h3{margin:14px 0 6px}#adm .pbtn{width:100%;padding:13px;border:0;border-radius:14px;background:#c4283f;color:#fff;font:700 16px Tajawal,system-ui,sans-serif;margin-top:8px;cursor:pointer}
 #adm .pbtn.g{background:#e5e7eb;color:#111}#adm .pbtn.r{background:#fee2e2;color:#b91c1c}#adm .msg{font-size:13px;margin-top:6px;min-height:18px}#adm .st{font-size:13px;opacity:.8;line-height:1.8}
@@ -88,7 +88,7 @@ async function panel(){
  const halls=LS('ctl_halls',[]),man=LS('ctl_man',[]),sc=LS('ctl_school',null);
  const stu=halls.reduce((a,h)=>a+(h.st||[]).length,0)+man.length;let docs=0;try{docs=(await idbAll()).length}catch(x){}
  let use='';try{const s=await navigator.storage.estimate();use=((s.usage||0)/1048576).toFixed(1)+' MB'}catch(x){}
- e.innerHTML=`<div class="bx"><div style="display:flex;justify-content:space-between;align-items:center"><b>⚙️ الإعدادات</b><button class="pbtn g" data-u="x" style="width:auto;padding:8px 14px;margin:0">إغلاق</button></div>
+ e.innerHTML=`<div class="bx"><div class="hd" style="display:flex;justify-content:space-between;align-items:center"><b>⚙️ الإعدادات</b><button class="pbtn g" data-u="x" style="width:auto;padding:8px 14px;margin:0">إغلاق</button></div>
  <h3>📊 بيانات هذا الجهاز</h3><div class="st">${esc(sc?'مدرسة '+sc.name:'مدرسة الخليل بن أحمد (الإعداد الافتراضي)')}<br>الطلاب: ${stu} · الوثائق والصور: ${docs}${use?' · المساحة: '+use:''}<br>آخر نسخة احتياطية: ${ago(LS('ctl_lastbk',0))}</div>
  <h3>🏫 المدرسة</h3><button class="pbtn" data-u="su">إعداد المدرسة والصفوف والمواعيد واستيراد الطلاب</button>
  <h3>💾 النسخ الاحتياطي</h3><button class="pbtn" data-u="bf">حفظ نسخة كاملة (مع الصور)</button><button class="pbtn g" data-u="bl">حفظ نسخة خفيفة (بدون صور)</button><button class="pbtn g" data-u="rs">استرجاع نسخة من ملف</button>
@@ -97,12 +97,14 @@ async function panel(){
  <h3>🆕 فصل دراسي جديد</h3><p class="st">للانتقال إلى الفصل الثاني: احفظ أرشيف الفصل الحالي، ثم صفِّر الغياب والتصحيح والجدول والوثائق مع إبقاء المدرسة والقاعات والطلاب لتعدّلها.</p>
  <button class="pbtn g" data-u="nt1">1) حفظ نسخة أرشيف الفصل (كاملة)</button><button class="pbtn" data-u="nt2">2) بدء فصل جديد</button><div class="msg" id="um2"></div>
  <h3>📖 دليل البدء</h3><a class="pbtn g" href="guide.html" target="_blank" style="display:block;text-align:center;text-decoration:none">دليل استخدام كنترول خطوة بخطوة</a>
+ <h3>🧹 تنظيف</h3><button class="pbtn g" data-u="dd">إزالة تكرار الطلاب (إن ظهر العدد مضاعفًا)</button><div class="msg" id="um3"></div>
  <h3>🗑️ حذف</h3><button class="pbtn r" data-u="wp">مسح كل بيانات هذا الجهاز</button></div>`}
 document.addEventListener('click',async ev=>{
  const b=ev.target.closest&&ev.target.closest('[data-a="bk"]');if(b){panel();return}
  const bb=ev.target.closest&&ev.target.closest('#bkb [data-b]');if(bb){const a=bb.dataset.b,bar=$('#bkb');if(a==='go'){bar.style.display='none';if(await saveBackup(true))bar.style.display='none'}else{W('ctl_snooze',Date.now());bar.style.display='none'}return}
  const t=ev.target.closest&&ev.target.closest('#adm [data-u]');if(!t)return;const a=t.dataset.u,m=()=>$('#um');
  if(a==='x')adm().style.display='none';
+ else if(a==='dd'){const n=dedupe();$('#um3').textContent=n?('تمت إزالة '+n+' تكرار، جارٍ التحديث…'):'لا توجد تكرارات.';if(n)setTimeout(()=>location.reload(),900)}
  else if(a==='su'){adm().style.display='none';window.openSetup&&window.openSetup()}
  else if(a==='bf'||a==='bl'){m().style.color='#059669';m().textContent='جارٍ التجهيز…';try{const ok=await saveBackup(a==='bf');m().textContent=ok?'تم تجهيز النسخة. احفظها في «الملفات» أو أرسلها لنفسك':'';if(ok)setTimeout(panel,1500)}catch(er){m().style.color='#dc2626';m().textContent='تعذر الحفظ: '+(er&&er.message||er)}}
  else if(a==='rs')doRestore(m());
@@ -127,6 +129,11 @@ function remind(){
  let bar=$('#bkb');if(!bar){bar=document.createElement('div');bar.id='bkb';document.body.appendChild(bar)}
  bar.innerHTML=`<span style="flex:1">💾 ${last?'لم تحفظ نسخة احتياطية منذ '+Math.floor(days)+' أيام':'لم تحفظ نسخة احتياطية بعد'}</span><button style="background:#c4283f;color:#fff" data-b="go">احفظ الآن</button><button style="background:#fde68a;color:#78350f" data-b="later">لاحقًا</button>`;bar.style.display='flex'}
 /* ---------- التشغيل ---------- */
+function dedupe(){let cnt=0;try{const hs=LS('ctl_halls',[]),by={},out=[];
+ hs.forEach(h=>{const k=h.n;if(by[k]){const t=by[k];(h.st||[]).forEach(x=>t.st.push(x));Object.assign(t.sup=t.sup||{},h.sup||{});t.ch=(t.ch||[]).concat(h.ch||[]);t.ev=(t.ev||[]).concat(h.ev||[]);cnt++}else{by[k]=Object.assign({},h,{st:(h.st||[]).slice()});out.push(by[k])}});
+ const seen={};out.forEach(h=>{const a=[];h.st.forEach(x=>{const id=String(x&&x.id!=null?x.id:'');if(id&&seen[id]){cnt++}else{if(id)seen[id]=1;a.push(x)}});h.st=a});
+ const m=[];LS('ctl_man',[]).forEach(x=>{const id=String(x&&x.id!=null?x.id:'');if(id&&seen[id]){cnt++}else{if(id)seen[id]=1;m.push(x)}});
+ if(cnt){localStorage.setItem('ctl_halls',JSON.stringify(out));localStorage.setItem('ctl_man',JSON.stringify(m))}}catch(e){}return cnt}
 function start(){
  const lk=$('#lk');if(lk)lk.style.display='none';
  const g=$('[data-a="bk"]');if(g)g.style.display='';
