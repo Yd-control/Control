@@ -96,6 +96,7 @@ async function panel(){
  <p class="st">بياناتك محفوظة على هذا الجهاز فقط. احفظ النسخة في «الملفات» أو أرسلها لنفسك، وكرّر ذلك بين وقت وآخر.</p>
  <h3>🆕 فصل دراسي جديد</h3><p class="st">للانتقال إلى الفصل الثاني: احفظ أرشيف الفصل الحالي، ثم صفِّر الغياب والتصحيح والجدول والوثائق مع إبقاء المدرسة والقاعات والطلاب لتعدّلها.</p>
  <button class="pbtn g" data-u="nt1">1) حفظ نسخة أرشيف الفصل (كاملة)</button><button class="pbtn" data-u="nt2">2) بدء فصل جديد</button><div class="msg" id="um2"></div>
+ <h3>📖 دليل البدء</h3><a class="pbtn g" href="guide.html" target="_blank" style="display:block;text-align:center;text-decoration:none">دليل استخدام كنترول خطوة بخطوة</a>
  <h3>🗑️ حذف</h3><button class="pbtn r" data-u="wp">مسح كل بيانات هذا الجهاز</button></div>`}
 document.addEventListener('click',async ev=>{
  const b=ev.target.closest&&ev.target.closest('[data-a="bk"]');if(b){panel();return}
