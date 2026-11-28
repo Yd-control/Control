@@ -81,7 +81,7 @@ function vPlan(){
  <details><summary>مراحل الحصة (${c.dur} دقيقة)</summary><div>${PH.map((p,i)=>`<div class="it"><b>${i+1}. ${p[1]}</b> <span class="tag">${mins[i]} د</span>${fld('ph.'+i+'.t','إجراء المعلم','',1)}${fld('ph.'+i+'.l','نشاط المتعلم')}${fld('ph.'+i+'.s','الاستراتيجية')}${fld('ph.'+i+'.q','سؤال محوري')}${fld('ph.'+i+'.e','دليل النجاح')}</div>`).join('')}</div></details>
  <details><summary>التقويم والدعم</summary><div>${fld('as.d','التقييم القبلي','',1)}${fld('as.f','التقييم التكويني','',1)}${fld('as.p','مهمة أداء')}${fld('as.w','نشاط كتابي')}${fld('as.q','اختبار قصير')}${fld('as.s','التقييم التحصيلي')}${fld('lang','دعم اللغة','',1)}${fld('diff','التدريس المتمايز','',1)}${fld('hw','الواجب المنزلي','',1)}${fld('support','الطلبة المستهدفون والدعم (أصحاب الهمم والموهوبون)','',1)}<label class="l">ترتيب جلوس الطلبة</label><select data-k="seat"><option value=""></option>${OPT.seatingArrangement.map(o=>`<option ${c.seat===o?'selected':''}>${o}</option>`).join('')}</select>${fld('refl','سؤال التأمل بعد التنفيذ','',1)}${fld('next','الخطوة التالية','',1)}</div></details>
  <div class="card"><h2>✨ تحضير بالذكاء الاصطناعي (اختياري)</h2><p class="mu">يجهّز نصاً من بيانات الدرس الأساسية، تلصقه في Claude أو Gemini أو ChatGPT، ثم تعيد الرد هنا فتُملأ الخانات. لا يُرسل التطبيق شيئاً بنفسه.</p><div class="row"><button class="btn" data-ai>✨ تجهيز النص</button><button class="btn g" data-aipaste>📥 لصق رد الذكاء الاصطناعي</button></div></div>
- <div class="card"><div class="row"><button class="btn" data-word>📘 تصدير Word</button><button class="btn g" data-pdf>📄 PDF / طباعة</button></div><button class="btn g" data-save style="width:100%">💾 حفظ الخطة</button><button class="btn g" data-back style="width:100%;margin-top:8px">← رجوع إلى الخطط</button><p class="mu">ملف Word يملأ قالب الوزارة نفسه. وفي ملف PDF اختر «حفظ في الملفات» من قائمة المشاركة.</p></div>`}
+ <div class="card"><div class="row"><button class="btn" data-word>📘 تصدير Word</button><button class="btn g" data-wdl>⬇️ تنزيل Word مباشرة</button><button class="btn g" data-pdf>📄 PDF / طباعة</button></div><button class="btn g" data-save style="width:100%">💾 حفظ الخطة</button><button class="btn g" data-back style="width:100%;margin-top:8px">← رجوع إلى الخطط</button><p class="mu">ملف Word يملأ قالب الوزارة نفسه. وفي ملف PDF اختر «حفظ في الملفات» من قائمة المشاركة.</p></div>`}
 function vSoon(t,d){return `<div class="card"><h2>${t}</h2><p class="mu">${d}</p><p class="mu">هذا القسم قيد البناء، وسيأتي في المرحلة التالية.</p></div>`}
 function render(){nav();$('#m').innerHTML=tab==='plan'?vPlan():tab==='test'?vSoon('📄 الاختبارات','إعداد الأسئلة وتصدير ورقة الاختبار Word وPDF.'):vSoon('🤝 الخطة العلاجية وأصحاب الهمم','الخطة العلاجية الفردية وتكييفات أصحاب الهمم.')}
 document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k&&cur){setv(k,e.target.value)}});
@@ -95,7 +95,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  else if(d.del){if(confirm('حذف الخطة؟')){plans=plans.filter(p=>p.id!==d.del);SV('ms_zone_plans',plans);render()}}
  else if(d.back!=null){if(history.state&&history.state.z===1)history.back();else{persist();cur=null;render();scrollTo(0,0)}}
  else if(d.save!=null){persist();alert('تم حفظ الخطة')}
- else if(d.word!=null){persist();try{await exportWord(cur)}catch(err){console.error(err);alert('تعذر إنشاء ملف Word: '+(err&&err.message||err))}}
+ else if(d.word!=null||d.wdl!=null){persist();try{await exportWord(cur,d.wdl!=null)}catch(err){console.error(err);alert('تعذر إنشاء ملف Word: '+(err&&err.message||err))}}
  else if(d.pdf!=null){persist();history.pushState({z:2},'');showPrint(cur)}
  else if(d.ai!=null)aiDialog();
  else if(d.aipaste!=null)aiPaste();
@@ -253,7 +253,7 @@ function normCell(tc,size){cellParas(tc).forEach(p=>{const pp=gp(p);if(!kid(pp,'
 function gridOf(tbl){const rows=kids(tbl,'tr'),g=[];rows.forEach((tr,ri)=>{const row=[];let i=0;kids(tr,'tc').forEach(tc=>{const tp=kid(tc,'tcPr'),gs=tp&&kid(tp,'gridSpan'),span=gs?+gs.getAttributeNS(WN,'val'):1,vm=tp&&kid(tp,'vMerge');let cell=tc;if(vm&&vm.getAttributeNS(WN,'val')!=='restart'&&ri>0&&g[ri-1][i])cell=g[ri-1][i];for(let k=0;k<span;k++)row[i++]=cell});g.push(row)});return{rows,g}}
 function markChecks(row,selected){const sel=selected.map(plain).filter(Boolean);new Set(row).forEach(tc=>{cellParas(tc).forEach(p=>{const t=plain(ptext(p));if(!t.includes('☐'))return;const opt=plain(t.replace('☐',''));if(sel.some(v=>v===opt||opt.includes(v)||v.includes(opt)))setPara(p,ptext(p).replace('☐','☑'),'right')})})}
 function labeled(tc,entries){const found=new Set();cellParas(tc).forEach(p=>{const cur=plain(ptext(p));for(const [k,v] of entries){if(cur.startsWith(k)){if(found.has(k))tc.removeChild(p);else{setPara(p,`${k}: ${v||'—'}`,'right');found.add(k)}break}}});entries.forEach(([k,v])=>{if(!found.has(k))appendCell(tc,`${k}: ${v||'—'}`,'right')})}
-async function exportWord(p){
+async function exportWord(p,direct){
  const r=await fetch('ministry-lesson-template.docx?v=1');if(!r.ok)throw new Error('ملف القالب ministry-lesson-template.docx غير مرفوع إلى المستودع');
  const files=await zipAll(await r.arrayBuffer());const doc=files.find(f=>f.name==='word/document.xml');
  XD=new DOMParser().parseFromString(new TextDecoder().decode(doc.data),'application/xml');
@@ -316,7 +316,7 @@ async function exportWord(p){
   return f});
  const blob=zipWrite(out),fn='lesson-plan-'+(p.date||'')+(p.grade?'-g'+p.grade:'')+(p.section?'-s'+String(p.section).replace(/[^\w]/g,''):'')+'.docx';
  const file=new File([blob],fn,{type:blob.type});
- try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:fn});return}}catch(e){if(e&&e.name==='AbortError')return}
+ try{if(!direct&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),800)}
 render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
