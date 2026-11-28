@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1f">
+<title>مدرستي</title>
+<link rel="icon" href="app-icon-192.png">
+<style>
+:root{--bg:#0a0f1f;--c1:#141b33;--c2:#1c2547;--tx:#eef1fb;--mu:#9aa5c8;--ac:#5ee6d4;--pu:#9a7cff;--or:#f0a93b;--pk:#f070a8;--bd:#27315a}
+:root[data-t=light]{--bg:#f4f6fb;--c1:#fff;--c2:#eef1fb;--tx:#16203d;--mu:#5a6584;--ac:#0e9f8f;--pu:#6a4bd6;--or:#c47a10;--pk:#c93a7c;--bd:#d5dbee}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+header{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd);background:var(--c1);position:sticky;top:0;z-index:5}
+header img{height:46px}header .t{flex:1}header b{display:block;font-size:17px}header small{color:var(--mu);font-size:12px}
+.ib{border:1px solid var(--bd);background:var(--c2);color:var(--tx);border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:var(--c1);border:1px solid var(--bd);border-radius:18px;padding:16px;margin:12px 0}
+.card h2{margin:0 0 8px;font-size:18px}.mu{color:var(--mu);font-size:14px}
+.big{font-size:44px;font-weight:800;color:var(--ac);line-height:1.1;direction:ltr;text-align:right}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border:1px solid var(--bd);border-radius:16px;padding:14px;background:var(--c2);cursor:pointer;text-align:center;font:inherit;color:var(--tx)}
+.tile b{display:block}.tile span{font-size:13px;color:var(--mu)}
+.c0{border-color:var(--ac)}.c1{border-color:var(--pu)}.c2{border-color:var(--or)}.c3{border-color:var(--pk)}
+.cd{display:flex;gap:8px;direction:ltr;justify-content:flex-end}.cd div{background:var(--c2);border:1px solid var(--bd);border-radius:12px;padding:6px 10px;text-align:center;min-width:56px}.cd b{font-size:22px;display:block}.cd span{font-size:11px;color:var(--mu)}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--c1);border-top:1px solid var(--bd);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{flex:1;border:0;background:none;color:var(--mu);font:inherit;font-size:12px;padding:6px 2px;cursor:pointer}nav button b{display:block;font-size:20px}
+nav button.on{color:var(--ac);font-weight:700}
+input,select,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:11px;font:inherit;margin:4px 0}
+textarea{min-height:90px}
+.btn{border:0;background:var(--ac);color:#06201c;border-radius:12px;padding:11px 16px;font:700 15px inherit;font-family:inherit;cursor:pointer;margin:4px 0}
+.btn.g{background:var(--c2);color:var(--tx);border:1px solid var(--bd)}.btn.r{background:#3a1620;color:#ff9aa8;border:1px solid #6a2434}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.it{border-bottom:1px dashed var(--bd);padding:10px 0}.it:last-child{border:0}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:1px 10px;background:var(--c2);border:1px solid var(--bd);color:var(--mu);margin-inline-start:6px}
+.warn{color:var(--or)}.bad{color:#ff7a8a}.ok{color:var(--ac)}
+.seg{display:flex;gap:6px;overflow:auto;padding:2px 0 8px}.seg button{white-space:nowrap;border:1px solid var(--bd);background:var(--c2);color:var(--tx);border-radius:999px;padding:7px 14px;font:inherit;cursor:pointer}.seg button.on{background:var(--ac);color:#06201c;border-color:var(--ac);font-weight:700}
+.bx{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}.bx>div{background:var(--c1);width:100%;max-width:760px;border-radius:22px 22px 0 0;padding:18px;max-height:90vh;overflow:auto}
+pre{white-space:pre-wrap;font:inherit;margin:6px 0}
+</style></head><body>
+<header><img src="emblem.png" alt=""><div class="t"><b id="hn">مدرستي</b><small id="hs"></small></div><button class="ib" id="thm">🌙</button></header>
+<main id="m"></main>
+<nav id="nv"></nav>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){alert('تعذر الحفظ: المساحة ممتلئة');return false}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const W=t=>String(t==null?'':t).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+/* ===== المدرسة (مشتركة مع كنترول) ===== */
+const SC=LS('ctl_school',null);
+const legacy=!SC;
+$('#hn').textContent='مدرستي'+(SC&&SC.name?' · '+SC.name:'');
+$('#hs').textContent=SC?[SC.ring,SC.gender].filter(Boolean).join(' · '):'مدرسة الخليل بن أحمد · الحلقة الثالثة للبنين';
+try{const lg=localStorage.getItem('ctl_logo');if(lg)document.querySelector('header img').src=lg}catch(e){}
+/* ===== السمة ===== */
+let th=LS('ms_th','dark');const setTh=()=>{document.documentElement.dataset.t=th;$('#thm').textContent=th==='dark'?'☀️':'🌙'};setTh();
+$('#thm').onclick=()=>{th=th==='dark'?'light':'dark';SV('ms_th',th);setTh()};
+/* ===== بيانات ===== */
+const AG0=[['بداية دوام الكادر','2026-08-24','','موعد أكاديمي'],['المولد النبوي','2026-08-28','','إجازة'],['التدريب التخصصي','2026-10-12','2026-10-14','موعد أكاديمي'],['إجازة منتصف الفصل','2026-10-15','2026-10-16','إجازة'],['الاختبار التجريبي','2026-11-18','2026-11-20','موعد أكاديمي'],['اختبارات نهاية الفصل الأول','2026-11-25','2026-11-27','موعد أكاديمي'],['إجازة اليوم الوطني','2026-12-02','','إجازة'],['استئناف اختبارات الفصل الأول','2026-12-07','','موعد أكاديمي'],['آخر يوم عمل للمعلمين','2027-07-09','','موعد أكاديمي']];
+let agenda=LS('ms_agenda',null);if(!agenda){agenda=legacy?AG0.map(a=>({id:uid(),t:a[0],f:a[1],e:a[2],k:a[3]})):[];SV('ms_agenda',agenda)}
+const SCH=[['sup','جدول الإشراف اليومي','🛡️'],['rad','جدول الإذاعة المدرسية','📻'],['vis','جدول تبادل الزيارات','👥'],['res','جدول الاحتياط اليومي','🗓️']];
+let sch=LS('ms_sched',{});
+const SEC=[['advisor','المرشد الأكاديمي المهني','إرشاد يصنع المستقبل'],['admin','الإدارة','تنظيم يساند الجميع'],['services','الخدمات المدرسية','خدماتك… في مكان واحد'],['circulars','التعميمات','كن على اطلاع'],['labs','المختبرات','اكتشف… جرّب… تعلّم'],['safety','الصحة والسلامة','سلامتنا مسؤولية مشتركة'],['clinic','العيادة المدرسية','رعاية واهتمام'],['inclusion','أصحاب الهمم','فرص عادلة… للجميع'],['initiatives','المبادرات','فكرة صغيرة… أثر كبير'],['research','البحوث والمشاريع','أفكار تتجاوز المألوف'],['competitions','المسابقات','تحدّ… أبدع… تألّق'],['trips','الرحلات','نتعلّم خارج الجدران'],['conduct','وثيقة السلوك المهني','قيم نؤمن بها… ونعيشها']];
+let sec=LS('ms_sec',{});
+const fmtD=s=>{if(!s)return'';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('ar-AE-u-nu-latn',{day:'numeric',month:'long',year:'numeric'})};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* ===== مختبري: IndexedDB ===== */
+let LAB=null;
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('mschool',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const idbGet=async k=>{const d=await idb();return new Promise((ok,no)=>{const q=d.transaction('k').objectStore('k').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)})};
+const idbSet=async(k,v)=>{const d=await idb();return new Promise((ok,no)=>{const t=d.transaction('k','readwrite');t.objectStore('k').put(v,k);t.oncomplete=()=>ok();t.onerror=()=>no(t.error)})};
+/* ===== مشاركة ملف ===== */
+async function saveFile(name,text,type){const f=new File([text],name,{type:type||'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500)}
+function pickFile(accept){return new Promise(res=>{const i=document.createElement('input');i.type='file';if(accept)i.accept=accept;i.onchange=()=>res(i.files[0]||null);i.click()})}
+function modal(h){const b=document.createElement('div');b.className='bx';b.innerHTML='<div>'+h+'<button class="btn g" style="width:100%;margin-top:10px" data-x>إغلاق</button></div>';b.onclick=e=>{if(e.target===b||e.target.dataset.x!=null)b.remove()};document.body.appendChild(b);return b}
+/* ===== التنقل ===== */
+const TABS=[['home','الرئيسية','🏠'],['ag','الأجندة','📅'],['sc','الجداول','🗓️'],['wd','عالمي','🌐'],['lab','مختبري','🧪']];
+let tab=LS('ms_tab','home'),secOpen=null;
+function nav(){$('#nv').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}"><b>${t[2]}</b>${t[1]}</button>`).join('');}
+$('#nv').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;secOpen=null;SV('ms_tab',tab);render();scrollTo(0,0)};
+/* ===== الرئيسية ===== */
+let tick=null;
+function nextEv(){const n=ymd(new Date());return agenda.filter(a=>(a.e||a.f)>=n).sort((a,b)=>a.f<b.f?-1:1)[0]}
+function vHome(){
+ const ne=nextEv();
+ return `<div class="card"><div class="mu" id="dd"></div><div class="big" id="ck"></div><div class="mu" id="hj"></div></div>
+ <div class="card"><h2>📅 القادم في الأجندة</h2>${ne?`<b>${esc(ne.t)}</b><div class="mu">${fmtD(ne.f)}${ne.e?' — '+fmtD(ne.e):''}</div><div class="cd" id="cd" style="margin-top:10px"></div>`:'<div class="mu">لا توجد مواعيد قادمة. أضف أجندتك من تبويب «الأجندة».</div>'}</div>
+ <div class="grid">${SCH.map((s,i)=>`<button class="tile c${i}" data-go="sc" data-s="${s[0]}">${s[2]}<b>${s[1]}</b></button>`).join('')}</div>
+ <div class="card"><h2>🧪 مختبري اليوم</h2><div id="lt" class="mu">جارٍ التحميل…</div></div>
+ <div class="grid"><button class="tile c0" data-open="index.html"><b>🧮 كنترول</b><span>الاختبارات والقاعات والتقارير</span></button><button class="tile c1" data-go="wd"><b>🌐 عالم مدرستي</b><span>13 قسماً</span></button></div>
+ <div class="card"><button class="btn g" data-bk>💾 حفظ نسخة احتياطية من مدرستي</button> <button class="btn g" data-rs>📂 استرجاع نسخة</button>
+ <p class="mu">بياناتك على هذا الجهاز فقط. احفظ نسخة احتياطية من حين لآخر.</p></div>`}
+function clock(){const d=new Date(),e=$('#ck');if(!e)return;
+ e.textContent=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ $('#dd').textContent=d.toLocaleDateString('ar-AE-u-nu-latn',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ try{$('#hj').textContent=new Intl.DateTimeFormat('ar-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'long',year:'numeric'}).format(d)+' هـ'}catch(x){}
+ const ne=nextEv(),c=$('#cd');if(ne&&c){const t=new Date(ne.f+'T00:00:00')-d;if(t<=0){c.innerHTML='<div><b>🎉</b><span>الآن</span></div>'}else{const s=Math.floor(t/1000);const v=[[Math.floor(s/86400),'يوم'],[Math.floor(s%86400/3600),'ساعة'],[Math.floor(s%3600/60),'دقيقة'],[s%60,'ثانية']];c.innerHTML=v.map(x=>`<div><b>${String(x[0]).padStart(2,'0')}</b><span>${x[1]}</span></div>`).join('')}}}
+async function labToday(){const e=$('#lt');if(!e)return;
+ if(!LAB)LAB=await idbGet('lab').catch(()=>null);
+ if(!LAB){e.innerHTML='لم تُستورد بيانات المختبر بعد. افتح تبويب «مختبري» ثم «استيراد من النسخة المستقلة».';return}
+ const t=ymd(new Date()),r=todayRows(t);
+ e.innerHTML=r.length?r.map(x=>`<div class="it"><b>${esc(x.lab)}</b><div class="mu">${x.ps.map(p=>'ح'+p[0]+': '+esc(p[1])).join(' · ')}</div></div>`).join(''):'لا حصص مسجّلة في جدول المختبر لهذا اليوم.'}
+function todayRows(t){return(LAB.weeklyRows||[]).filter(r=>r.date===t).map(r=>({lab:r.lab,ps:[1,2,3,4,5,6,7,8].map(i=>[i,r['p'+i]]).filter(p=>p[1])})).filter(x=>x.ps.length)}
+/* ===== الأجندة ===== */
+function vAg(){const n=ymd(new Date());const l=agenda.slice().sort((a,b)=>a.f<b.f?-1:1);
+ return `<div class="card"><h2>📅 الأجندة المدرسية</h2><p class="mu">أضف المواعيد أو الصق قائمة. الصيغة: عنوان، من (YYYY-MM-DD)، إلى (اختياري)، النوع.</p>
+ <div class="row"><input id="at" placeholder="العنوان"><input id="af" type="date"><input id="ae" type="date"><select id="ak"><option>موعد أكاديمي</option><option>إجازة</option><option>اختبارات</option><option>فعالية</option></select></div>
+ <button class="btn" data-ag-add>➕ إضافة</button> <button class="btn g" data-ag-imp>📥 لصق قائمة</button></div>
+ <div class="card">${l.length?l.map(a=>`<div class="it"><div class="row"><div style="flex:3"><b>${esc(a.t)}</b><span class="tag">${esc(a.k)}</span><div class="mu ${(a.e||a.f)<n?'':'ok'}">${fmtD(a.f)}${a.e?' — '+fmtD(a.e):''}</div></div><button class="btn r" style="flex:0" data-ag-del="${a.id}">🗑️</button></div></div>`).join(''):'<div class="mu">لا توجد مواعيد.</div>'}</div>
+ ${legacy?'<p class="mu warn">هذه المواعيد مبدئية من اللقطات، راجعها وعدّلها.</p>':''}`}
+/* ===== الجداول ===== */
+let schK='sup';
+function vSc(){const s=SCH.find(x=>x[0]===schK),l=(sch[schK]||[]);
+ return `<div class="seg">${SCH.map(x=>`<button data-sk="${x[0]}" class="${x[0]===schK?'on':''}">${x[2]} ${x[1].replace('جدول ','')}</button>`).join('')}</div>
+ <div class="card"><h2>${s[2]} ${s[1]}</h2>
+ <div class="row"><input id="sd" placeholder="اليوم أو التاريخ"><input id="sp" placeholder="الحصة / الوقت"><input id="sw" placeholder="الاسم"><input id="sn" placeholder="ملاحظة"></div>
+ <button class="btn" data-sc-add>➕ إضافة</button> <button class="btn g" data-sc-share>📤 مشاركة الجدول</button></div>
+ <div class="card">${l.length?l.map((x,i)=>`<div class="it"><div class="row"><div style="flex:4"><b>${esc(x.w)}</b> <span class="tag">${esc(x.d)}</span><span class="tag">${esc(x.p)}</span>${x.n?'<div class="mu">'+esc(x.n)+'</div>':''}</div><button class="btn r" style="flex:0" data-sc-del="${i}">🗑️</button></div></div>`).join(''):'<div class="mu">الجدول فارغ.</div>'}</div>`}
+/* ===== عالم مدرستي ===== */
+function vWd(){
+ if(secOpen){const s=SEC.find(x=>x[0]===secOpen),l=sec[secOpen]||[];
+  return `<button class="btn g" data-back>← رجوع</button><div class="card"><h2>${s[1]}</h2><div class="mu">${s[2]}</div>
+  <input id="st" placeholder="العنوان"><textarea id="sx" placeholder="المحتوى أو الملاحظة"></textarea><button class="btn" data-se-add>➕ حفظ</button></div>
+  <div class="card">${l.length?l.map(x=>`<div class="it"><b>${esc(x.t)}</b><pre>${esc(x.x)}</pre><div class="mu">${esc(x.at)}</div><button class="btn r" data-se-del="${x.id}">🗑️ حذف</button> <button class="btn g" data-se-sh="${x.id}">📤</button></div>`).join(''):'<div class="mu">لا يوجد محتوى بعد.</div>'}</div>`}
+ return `<div class="card"><h2>🌐 عالم مدرستي <span class="tag">13</span></h2><input id="sq" placeholder="ابحث عن قسم…"></div><div id="sl" class="grid">${SEC.map((s,i)=>`<button class="tile c${i%4}" data-sec="${s[0]}"><b>${s[1]}</b><span>${s[2]}${(sec[s[0]]||[]).length?' · '+(sec[s[0]]||[]).length:''}</span></button>`).join('')}</div>`}
+/* ===== مختبري ===== */
+let labT='today',labQ='',labG='';
+function vLab(){
+ const head=`<div class="card"><h2>🧪 مختبري</h2><p class="mu">نسخة محلية تُحدَّث من النسخة المستقلة: صدّر نسخة من تطبيق مختبري، ثم استوردها هنا.</p>
+ <button class="btn" data-lab-imp>📥 استيراد من النسخة المستقلة</button> ${LAB?'<button class="btn g" data-lab-exp>📤 تصدير نسخة</button>':''}</div>`;
+ if(!LAB)return head+'<div class="card mu">لم تُستورد بيانات بعد.</div>';
+ const D=LAB,T=[['today','اليوم'],['exp','التجارب'],['mat','المواد'],['vis','الزيارات'],['prep','التحضير']];
+ const seg=`<div class="seg">${T.map(t=>`<button data-lt="${t[0]}" class="${labT===t[0]?'on':''}">${t[1]}</button>`).join('')}</div>`;
+ let b='';const q=W(labQ).trim().toLowerCase(),has=(...f)=>!q||f.some(x=>String(x||'').toLowerCase().includes(q));
+ if(labT==='today'){const t=ymd(new Date()),r=todayRows(t),v=(D.visits||[]).filter(x=>x.date===t),p=(D.preps||[]).filter(x=>x.date===t);
+  b=`<div class="card"><h2>جدول اليوم</h2>${r.length?r.map(x=>`<div class="it"><b>${esc(x.lab)}</b><div class="mu">${x.ps.map(p=>'ح'+p[0]+': '+esc(p[1])).join(' · ')}</div></div>`).join(''):'<div class="mu">لا حصص اليوم في جدول المختبر.</div>'}</div>
+  <div class="card"><h2>زيارات اليوم</h2>${v.length?v.map(visIt).join(''):'<div class="mu">لا زيارات مسجلة.</div>'}</div>
+  <div class="card"><h2>تحضيرات اليوم</h2>${p.length?p.map(prepIt).join(''):'<div class="mu">لا تحضيرات.</div>'}</div>
+  <button class="btn" data-lab-rem>📤 تجهيز تذكير اليوم للمشاركة</button>`}
+ else if(labT==='exp'){const l=(D.experiments||[]).filter(x=>(!labG||String(x.grade)===labG)&&has(x.title,x.titleEnglish,x.subject,x.requirements));
+  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في التجارب…"><select id="lg"><option value="">كل الصفوف</option>${[...new Set((D.experiments||[]).map(x=>String(x.grade)))].sort().map(g=>`<option ${g===labG?'selected':''}>${g}</option>`).join('')}</select><div class="mu">${l.length} تجربة</div></div>`+l.slice(0,60).map(x=>`<div class="card"><b>${esc(x.title)}</b><div class="mu">${esc(x.titleEnglish||'')}</div><span class="tag">صف ${esc(x.grade)}</span><span class="tag">${esc(x.track||'')}</span><span class="tag">${esc(x.subject)}</span><span class="tag">فصل ${esc(x.term)}</span><pre class="mu">${esc(x.requirementsArabic||x.requirements||'')}</pre></div>`).join('')+(l.length>60?'<div class="mu">اكتب في البحث لتضييق النتائج…</div>':'')}
+ else if(labT==='mat'){const now=new Date().toISOString().slice(0,7),l=(D.materials||[]).filter(x=>has(x.name,x.english,x.location));
+  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في المواد والأدوات…"><div class="mu">${l.length} عنصر</div></div>`+l.slice(0,80).map(x=>{const ex=(x.expiryMonth||'').slice(0,7),st=ex&&ex<now?'bad':'';return `<div class="card"><b>${esc(x.name)}</b><div class="mu">${esc(x.english||'')}</div><span class="tag">${x.kind==='chemical'?'مادة':'أداة'}</span><span class="tag">${esc(x.opening)} ${esc(x.unit||'')}</span>${ex?`<span class="tag ${st}">انتهاء ${ex}</span>`:''}${x.location?`<span class="tag">${esc(x.location)}</span>`:''}</div>`}).join('')}
+ else if(labT==='vis'){const l=(D.visits||[]).filter(x=>has(x.teacher,x.title,x.subject,x.lab)).sort((a,b)=>(a.date||'z')<(b.date||'z')?-1:1);
+  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في الزيارات…"><div class="mu">${l.length} زيارة</div></div>`+l.slice(0,80).map(x=>`<div class="card">${visIt(x)}</div>`).join('')}
+ else{const l=(D.preps||[]).filter(x=>has(x.title,x.lesson,x.teacher)).sort((a,b)=>(a.date||'')<(b.date||'')?1:-1);
+  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في التحضيرات…"><div class="mu">${l.length} تحضير</div></div>`+l.map(x=>`<div class="card">${prepIt(x)}<pre class="mu">${esc((x.requirements||'').slice(0,500))}</pre></div>`).join('')}
+ return head+seg+b}
+const visIt=x=>`<div class="it"><b>${esc(x.title||'(بدون عنوان)')}</b><div class="mu">${esc(x.teacher)} · ${esc(x.subject||'')} · ${x.grade?'صف '+esc(x.grade):''} ${esc(x.track||'')} ${x.section?'· شعبة '+esc(x.section):''}</div><span class="tag">${x.date?fmtD(x.date):'بلا تاريخ'}</span><span class="tag">${x.period?'حصة '+esc(x.period):''}</span><span class="tag">${esc(x.lab||'')}</span></div>`;
+const prepIt=x=>`<div class="it"><b>${esc(x.title)}</b><div class="mu">${esc(x.lesson||'')} · ${esc(x.teacher||'')}</div><span class="tag">${x.date?fmtD(x.date):''}</span><span class="tag">${esc(x.status||'')}</span></div>`;
+function remText(){const t=ymd(new Date()),v=(LAB.visits||[]).filter(x=>x.date===t&&x.title);if(!v.length)return '';
+ return v.map(x=>`تذكير تجارب المختبر\n${t}\nالمعلم: ${x.teacher}\nالتجربة: ${x.title}\nالمادة: ${x.subject||''}\nالصف: ${x.grade||''} ${x.track||''}${x.section?' · الشعبة: '+x.section:''}\nالمختبر: ${x.lab||''} · الحصة: ${x.period||''}`).join('\n\n')}
+/* ===== الرسم ===== */
+function render(){nav();const m=$('#m');
+ m.innerHTML=({home:vHome,ag:vAg,sc:vSc,wd:vWd,lab:vLab}[tab]||vHome)();
+ clearInterval(tick);if(tab==='home'){clock();tick=setInterval(clock,1000);labToday()}
+ if(tab==='lab'&&!LAB)idbGet('lab').then(v=>{if(v){LAB=v;render()}}).catch(()=>{})}
+/* ===== الأحداث ===== */
+document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+ if(d.go){tab=d.go;if(d.s)schK=d.s;SV('ms_tab',tab);render();scrollTo(0,0)}
+ else if(d.open)location.href=d.open;
+ else if(d.sk!=null){schK=d.sk;render()}
+ else if(d.agAdd!=null){const a={id:uid(),t:$('#at').value.trim(),f:$('#af').value,e:$('#ae').value,k:$('#ak').value};if(!a.t||!a.f){alert('اكتب العنوان والتاريخ');return}agenda.push(a);SV('ms_agenda',agenda);render()}
+ else if(d.agDel){agenda=agenda.filter(a=>a.id!==d.agDel);SV('ms_agenda',agenda);render()}
+ else if(d.agImp!=null){const b=modal('<h2>لصق قائمة المواعيد</h2><p class="mu">سطر لكل موعد: العنوان، من، إلى، النوع<br>مثال: اختبارات نهاية الفصل، 2026-11-25، 2026-11-27، اختبارات</p><textarea id="agt" style="min-height:160px"></textarea><button class="btn" id="agok">إضافة</button>');
+  b.querySelector('#agok').onclick=()=>{let n=0;b.querySelector('#agt').value.split(/\n/).forEach(l=>{const p=W(l).split(/[,،\t]/).map(s=>s.trim());if(p[0]&&/^\d{4}-\d{2}-\d{2}$/.test(p[1]||'')){agenda.push({id:uid(),t:p[0],f:p[1],e:/^\d{4}-\d{2}-\d{2}$/.test(p[2]||'')?p[2]:'',k:p[3]||'موعد أكاديمي'});n++}});SV('ms_agenda',agenda);b.remove();render();alert('أُضيف '+n+' موعداً')}}
+ else if(d.scAdd!=null){const x={d:$('#sd').value.trim(),p:$('#sp').value.trim(),w:$('#sw').value.trim(),n:$('#sn').value.trim()};if(!x.w){alert('اكتب الاسم');return}(sch[schK]=sch[schK]||[]).push(x);SV('ms_sched',sch);render()}
+ else if(d.scDel!=null){sch[schK].splice(+d.scDel,1);SV('ms_sched',sch);render()}
+ else if(d.scShare!=null){const s=SCH.find(x=>x[0]===schK);const tx=s[1]+'\n'+(sch[schK]||[]).map(x=>`${x.d} · ${x.p} · ${x.w}${x.n?' ('+x.n+')':''}`).join('\n');shareTxt(tx)}
+ else if(d.sec){secOpen=d.sec;render();scrollTo(0,0)}
+ else if(d.back!=null){secOpen=null;render()}
+ else if(d.seAdd!=null){const x={id:uid(),t:$('#st').value.trim(),x:$('#sx').value.trim(),at:new Date().toLocaleDateString('ar-AE-u-nu-latn')};if(!x.t&&!x.x)return;(sec[secOpen]=sec[secOpen]||[]).push(x);SV('ms_sec',sec);render()}
+ else if(d.seDel){sec[secOpen]=sec[secOpen].filter(x=>x.id!==d.seDel);SV('ms_sec',sec);render()}
+ else if(d.seSh){const x=sec[secOpen].find(x=>x.id===d.seSh);shareTxt(x.t+'\n'+x.x)}
+ else if(d.labImp!=null)labImport();
+ else if(d.labExp!=null)saveFile('lab-daily-backup-'+ymd(new Date())+'.json',JSON.stringify({app:'lab-daily',data:LAB}));
+ else if(d.lt){labT=d.lt;labQ='';render()}
+ else if(d.labRem!=null){const x=remText();x?shareTxt(x):alert('لا تجارب مسجلة لليوم.')}
+ else if(d.bk!=null)backup();
+ else if(d.rs!=null)restore();
+});
+document.addEventListener('input',e=>{if(e.target.id==='lq'){labQ=e.target.value;clearTimeout(window.__lt);window.__lt=setTimeout(()=>{const p=e.target.selectionStart;render();const n=$('#lq');if(n){n.focus();n.setSelectionRange(p,p)}},350)}
+ if(e.target.id==='sq'){const q=e.target.value.trim();document.querySelectorAll('#sl .tile').forEach(b=>{b.style.display=!q||b.textContent.includes(q)?'':'none'})}});
+document.addEventListener('change',e=>{if(e.target.id==='lg'){labG=e.target.value;render()}});
+function shareTxt(t){if(navigator.share)navigator.share({text:t}).catch(()=>{});else{navigator.clipboard&&navigator.clipboard.writeText(t);alert('نُسخ النص')}}
+async function labImport(){const f=await pickFile();if(!f)return;let j;
+ try{j=JSON.parse(await f.text())}catch(e){alert('تعذرت قراءة الملف');return}
+ const d=j&&j.app==='lab-daily'?j.data:(j&&j.preps&&j.experiments?j:null);
+ if(!d){alert('هذا الملف ليس نسخة من تطبيق مختبري');return}
+ const c=(d.preps||[]).length+' تحضير، '+(d.visits||[]).length+' زيارة، '+(d.experiments||[]).length+' تجربة، '+(d.materials||[]).length+' مادة';
+ if(LAB&&!confirm('سيستبدل الاستيراد بيانات المختبر الحالية بما في الملف:\n'+c+'\nمتابعة؟'))return;
+ await idbSet('lab',d);LAB=d;render();alert('تم الاستيراد: '+c)}
+async function backup(){const o={_ms:1,at:Date.now(),ls:{}};Object.keys(localStorage).filter(k=>k.indexOf('ms_')===0).forEach(k=>o.ls[k]=localStorage.getItem(k));o.lab=LAB||await idbGet('lab').catch(()=>null);
+ await saveFile('madrasati-backup-'+ymd(new Date())+'.json',JSON.stringify(o))}
+async function restore(){const f=await pickFile();if(!f)return;let o;try{o=JSON.parse(await f.text())}catch(e){alert('تعذرت قراءة الملف');return}
+ if(!o||!o._ms){alert('ليس ملف نسخة مدرستي');return}if(!confirm('سيستبدل هذا بيانات مدرستي الحالية. متابعة؟'))return;
+ Object.keys(localStorage).filter(k=>k.indexOf('ms_')===0).forEach(k=>localStorage.removeItem(k));Object.keys(o.ls||{}).forEach(k=>{if(k.indexOf('ms_')===0)localStorage.setItem(k,o.ls[k])});
+ if(o.lab)await idbSet('lab',o.lab);location.reload()}
+agenda=LS('ms_agenda',agenda);sch=LS('ms_sched',{});sec=LS('ms_sec',{});
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
