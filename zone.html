@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1f">
+<title>my zone</title>
+<link rel="icon" href="app-icon-192.png">
+<style>
+:root{--bg:#0a0f1f;--c1:#141b33;--c2:#1c2547;--tx:#eef1fb;--mu:#9aa5c8;--ac:#5ee6d4;--pu:#9a7cff;--or:#f0a93b;--bd:#27315a}
+:root[data-t=light]{--bg:#f4f6fb;--c1:#fff;--c2:#eef1fb;--tx:#16203d;--mu:#5a6584;--ac:#0e9f8f;--pu:#6a4bd6;--or:#c47a10;--bd:#d5dbee}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+header{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd);background:var(--c1);position:sticky;top:0;z-index:5}
+header .t{flex:1}header b{display:block;font-size:17px}header small{color:var(--mu);font-size:12px}
+.ib{border:1px solid var(--bd);background:var(--c2);color:var(--tx);border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer;text-decoration:none}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:var(--c1);border:1px solid var(--bd);border-radius:18px;padding:16px;margin:12px 0}
+.card h2{margin:0 0 8px;font-size:18px}.mu{color:var(--mu);font-size:14px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:11px;font:inherit;margin:4px 0}
+textarea{min-height:84px}label.l{display:block;color:var(--mu);font-size:13px;margin-top:8px}
+.btn{border:0;background:var(--ac);color:#06201c;border-radius:12px;padding:11px 16px;font:700 15px inherit;font-family:inherit;cursor:pointer;margin:4px 0}
+.btn.g{background:var(--c2);color:var(--tx);border:1px solid var(--bd)}.btn.r{background:#3a1620;color:#ff9aa8;border:1px solid #6a2434}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.it{border-bottom:1px dashed var(--bd);padding:10px 0}.it:last-child{border:0}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:1px 10px;background:var(--c2);border:1px solid var(--bd);color:var(--mu);margin-inline-start:6px}
+details{border:1px solid var(--bd);border-radius:14px;margin:10px 0;background:var(--c1)}summary{padding:12px 14px;font-weight:700;cursor:pointer}details>div{padding:0 14px 14px}
+.chk{display:flex;flex-wrap:wrap;gap:6px}.chk label{border:1px solid var(--bd);background:var(--c2);border-radius:999px;padding:5px 12px;font-size:14px;cursor:pointer}.chk input{display:none}.chk input:checked+span{color:var(--ac);font-weight:700}.chk label:has(input:checked){border-color:var(--ac)}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--c1);border-top:1px solid var(--bd);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{flex:1;border:0;background:none;color:var(--mu);font:inherit;font-size:12px;padding:6px 2px;cursor:pointer}nav button b{display:block;font-size:20px}nav button.on{color:var(--ac);font-weight:700}
+.bx{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}.bx>div{background:var(--c1);width:100%;max-width:760px;border-radius:22px 22px 0 0;padding:18px;max-height:90vh;overflow:auto}
+#pv{position:fixed;inset:0;background:#fff;color:#000;z-index:30;overflow:auto;padding:12px;display:none}
+#pv .bar{position:sticky;top:0;background:#fff;padding:6px 0;display:flex;gap:8px;z-index:2}
+#pv table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}#pv td,#pv th{border:1px solid #444;padding:5px 7px;vertical-align:top;text-align:right}#pv th{background:#e8edf7}
+#pv h1,#pv h2{text-align:center;margin:6px 0}#pv h1{font-size:18px}#pv h2{font-size:15px}#pv .m{text-align:center;font-size:12px}
+@media print{body>*:not(#pv){display:none!important}#pv{position:static;display:block!important;padding:0}#pv .bar{display:none}@page{size:A4;margin:12mm}}
+</style></head><body>
+<header><a class="ib" href="home.html">← مدرستي</a><div class="t"><b>my zone</b><small>مساحة المعلم · محلي على جهازك</small></div><button class="ib" id="thm">☀️</button></header>
+<main id="m"></main>
+<nav id="nv"></nav>
+<div id="pv"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){alert('تعذر الحفظ');return false}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+let th=LS('ms_th','dark');const setTh=()=>{document.documentElement.dataset.t=th;$('#thm').textContent=th==='dark'?'☀️':'🌙'};setTh();
+$('#thm').onclick=()=>{th=th==='dark'?'light':'dark';SV('ms_th',th);setTh()};
+/* ===== الثوابت ===== */
+const PH=[['engage','التهيئة واستدعاء المعرفة السابقة'],['investigate','الاستقصاء وبناء الفكرة'],['explain','النمذجة والتوضيح'],['practice','التطبيق والممارسة'],['assess','التقويم الختامي والغلق']];
+const MIN={35:[4,7,9,11,4],40:[4,8,10,14,4],45:[5,9,12,14,5],50:[5,10,13,17,5],60:[6,12,16,20,6]};
+const OPT={sciencePractices:['طرح الأسئلة وتحديد المشكلات','تطوير واستخدام النماذج','تخطيط وتنفيذ التحقيقات','تحليل وتفسير البيانات','استخدام الرياضيات والتفكير الحاسوبي','بناء التفسيرات وتصميم الحلول','الانخراط في النقاش القائم على الأدلة','الحصول على المعلومات وتقييمها ومشاركتها'],
+scientificMethodSteps:['القيام بملاحظة','طرح سؤال بحثي','جمع المعلومات الخلفية والقيام بالبحث','تكوين فرضية','صياغة توقع','تخطيط التجربة (تصميم التحقيق وتحديد المتغيرات)','إجراء التجربة','جمع وتسجيل البيانات','التوصل إلى استنتاجات استنادًا إلى الأدلة','مشاركة النتائج والاستنتاجات','التفكير واقتراح الخطوات التالية أو التحقيقات الإضافية','تحليل وتفسير وتقييم البيانات'],
+higherOrderSkills:['تحليل','تقييم','تبرير','استدلال','تكوين فرضية','إقامة روابط','استخلاص استنتاجات','تلخيص المعلومات','تصميم الحلول','الدفاع عن وجهة نظر','بناء تفسير'],
+competencies:['التفكير النقدي','التعاون','التواصل','المرونة والقدرة على التكيف','التفكير الإبداعي','الابتكار','ريادة الأعمال','الإنتاجية','المساءلة','القيادة','المسؤولية','الهوية الثقافية','المبادرة والتوجه الذاتي','المرونة النفسية والتنظيم العاطفي','المهارات الاجتماعية والثقافية'],
+crossCurricularLinks:['الكفاءة الرقمية','الحساب','الاستدامة','القرائية','الذكاء الاصطناعي','الدراسات الاجتماعية'],
+seatingArrangement:['فردي','ثنائي','مجموعات (نفس المستوى)','مجموعات (مستويات مختلفة)','محطات عمل (دوران)','مرن','شكل حرف U']};
+const OPTN={sciencePractices:'ممارسات العلوم والهندسة',scientificMethodSteps:'خطوات الطريقة العلمية',higherOrderSkills:'مهارات التفكير العليا',competencies:'مهارات القرن 21',crossCurricularLinks:'الروابط العابرة للمواد'};
+/* ===== نموذج الخطة ===== */
+const blank=()=>({id:uid(),ts:Date.now(),teacher:LS('ms_zone_prof',{}).teacher||'',subject:LS('ms_zone_prof',{}).subject||'',grade:'',track:'',section:'',date:new Date().toISOString().slice(0,10),dur:45,title:'',unit:'',secTitle:'',
+outcomes:'',prior:'',objectives:'',misc:'',vocab:'',chk:{},uae:'',resources:'',materials:'',questions:'',
+ph:PH.map(()=>({t:'',l:'',s:'',q:'',e:''})),as:{d:'',f:'',p:'',w:'',q:'',s:''},lang:'',diff:'',hw:'',support:'',seat:'',refl:'',next:''});
+let plans=LS('ms_zone_plans',[]),cur=null,tab='plan';
+const TABS=[['plan','التحضير','📝'],['test','الاختبارات','📄'],['rem','العلاجية والهمم','🤝']];
+function nav(){$('#nv').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}"><b>${t[2]}</b>${t[1]}</button>`).join('')}
+$('#nv').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;render();scrollTo(0,0)};
+/* ===== الواجهة ===== */
+const fld=(k,lab,ph,rows)=>`<label class="l">${lab}</label>${rows?`<textarea data-k="${k}" placeholder="${esc(ph||'')}">${esc(get(k))}</textarea>`:`<input data-k="${k}" value="${esc(get(k))}" placeholder="${esc(ph||'')}">`}`;
+const get=k=>{const p=k.split('.');let o=cur;for(const x of p)o=o==null?'':o[x];return o==null?'':o};
+const setv=(k,v)=>{const p=k.split('.');let o=cur;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=v};
+function vPlan(){
+ if(!cur)return `<div class="card"><h2>📝 التحضير</h2><p class="mu">أنشئ خطة درس، ثم صدّرها بقالب وزارة التربية (Word) أو PDF.</p><button class="btn" data-new>➕ خطة جديدة</button></div>`+
+ (plans.length?`<div class="card"><h2>خططك المحفوظة (${plans.length})</h2>${plans.slice().sort((a,b)=>b.ts-a.ts).map(p=>`<div class="it"><b>${esc(p.title||'(بلا عنوان)')}</b><div class="mu">${esc(p.subject)} ${p.grade?'· صف '+esc(p.grade):''} ${p.section?'· شعبة '+esc(p.section):''} · ${esc(p.date)}</div><div class="row"><button class="btn g" data-open="${p.id}">فتح</button><button class="btn g" data-dup="${p.id}">نسخ</button><button class="btn r" data-del="${p.id}" style="flex:0">🗑️</button></div></div>`).join('')}</div>`:'');
+ const c=cur,mins=MIN[c.dur]||MIN[45];
+ const chk=k=>`<label class="l">${OPTN[k]}</label><div class="chk">${OPT[k].map(o=>`<label><input type="checkbox" data-c="${k}" value="${esc(o)}" ${((c.chk[k]||[]).includes(o))?'checked':''}><span>${esc(o)}</span></label>`).join('')}</div>`;
+ return `<button class="btn g" data-back>← الخطط</button>
+ <details open><summary>البيانات الأساسية</summary><div>${fld('teacher','المعلم')}${fld('subject','المادة')}
+ <div class="row"><div><label class="l">الصف</label><select data-k="grade"><option value=""></option>${[9,10,11,12].map(g=>`<option ${String(c.grade)===String(g)?'selected':''}>${g}</option>`).join('')}</select></div><div><label class="l">المسار</label><select data-k="track"><option value=""></option><option value="عام" ${c.track==='عام'?'selected':''}>عام</option><option value="متقدم" ${c.track==='متقدم'?'selected':''}>متقدم</option></select></div><div><label class="l">الشعبة</label><input data-k="section" value="${esc(c.section)}"></div></div>
+ <div class="row"><div><label class="l">التاريخ</label><input type="date" data-k="date" value="${esc(c.date)}"></div><div><label class="l">مدة الحصة (دقيقة)</label><select data-k="dur">${[35,40,45,50,60].map(d=>`<option ${+c.dur===d?'selected':''}>${d}</option>`).join('')}</select></div></div>
+ ${fld('title','عنوان الدرس')}${fld('unit','عنوان الوحدة')}${fld('secTitle','عنوان القسم أو الموضوع (اختياري)')}</div></details>
+ <details><summary>المنهج والموارد</summary><div>${fld('outcomes','نواتج التعلم (سطر لكل ناتج)','',1)}${fld('prior','المعرفة السابقة','',1)}${fld('objectives','أهداف القسم (سطر لكل هدف)','',1)}${fld('misc','المفاهيم الخاطئة المحتملة','',1)}${fld('vocab','المفردات (سطر لكل مفردة: المفردة — معناها)','',1)}${fld('uae','الربط بدولة الإمارات','',1)}${fld('resources','الموارد التعليمية','',1)}${fld('materials','المواد والأدوات','',1)}${fld('questions','الأسئلة الرئيسة (سطر لكل سؤال)','',1)}</div></details>
+ <details><summary>المهارات والكفاءات (اختيار)</summary><div>${Object.keys(OPTN).map(chk).join('')}</div></details>
+ <details><summary>مراحل الحصة (${c.dur} دقيقة)</summary><div>${PH.map((p,i)=>`<div class="it"><b>${i+1}. ${p[1]}</b> <span class="tag">${mins[i]} د</span>${fld('ph.'+i+'.t','إجراء المعلم','',1)}${fld('ph.'+i+'.l','نشاط المتعلم')}${fld('ph.'+i+'.s','الاستراتيجية')}${fld('ph.'+i+'.q','سؤال محوري')}${fld('ph.'+i+'.e','دليل النجاح')}</div>`).join('')}</div></details>
+ <details><summary>التقويم والدعم</summary><div>${fld('as.d','التقييم القبلي','',1)}${fld('as.f','التقييم التكويني','',1)}${fld('as.p','مهمة أداء')}${fld('as.w','نشاط كتابي')}${fld('as.q','اختبار قصير')}${fld('as.s','التقييم التحصيلي')}${fld('lang','دعم اللغة','',1)}${fld('diff','التدريس المتمايز','',1)}${fld('hw','الواجب المنزلي','',1)}${fld('support','الطلبة المستهدفون والدعم (أصحاب الهمم والموهوبون)','',1)}<label class="l">ترتيب جلوس الطلبة</label><select data-k="seat"><option value=""></option>${OPT.seatingArrangement.map(o=>`<option ${c.seat===o?'selected':''}>${o}</option>`).join('')}</select>${fld('refl','سؤال التأمل بعد التنفيذ','',1)}${fld('next','الخطوة التالية','',1)}</div></details>
+ <div class="card"><h2>✨ تحضير بالذكاء الاصطناعي (اختياري)</h2><p class="mu">يجهّز نصاً من بيانات الدرس الأساسية، تلصقه في Claude أو Gemini أو ChatGPT، ثم تعيد الرد هنا فتُملأ الخانات. لا يُرسل التطبيق شيئاً بنفسه.</p><div class="row"><button class="btn" data-ai>✨ تجهيز النص</button><button class="btn g" data-aipaste>📥 لصق رد الذكاء الاصطناعي</button></div></div>
+ <div class="card"><div class="row"><button class="btn" data-word>📘 تصدير Word</button><button class="btn g" data-pdf>📄 PDF / طباعة</button></div><button class="btn g" data-save style="width:100%">💾 حفظ الخطة</button><p class="mu">ملف Word يملأ قالب الوزارة نفسه. وفي ملف PDF اختر «حفظ في الملفات» من قائمة المشاركة.</p></div>`}
+function vSoon(t,d){return `<div class="card"><h2>${t}</h2><p class="mu">${d}</p><p class="mu">هذا القسم قيد البناء، وسيأتي في المرحلة التالية.</p></div>`}
+function render(){nav();$('#m').innerHTML=tab==='plan'?vPlan():tab==='test'?vSoon('📄 الاختبارات','إعداد الأسئلة وتصدير ورقة الاختبار Word وPDF.'):vSoon('🤝 الخطة العلاجية وأصحاب الهمم','الخطة العلاجية الفردية وتكييفات أصحاب الهمم.')}
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k&&cur){setv(k,e.target.value)}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.c&&cur){const k=t.dataset.c;cur.chk[k]=[...document.querySelectorAll(`input[data-c="${k}"]:checked`)].map(x=>x.value)}
+ if(t.dataset&&t.dataset.k==='dur'&&cur){render()}});
+function persist(){if(!cur)return;const i=plans.findIndex(p=>p.id===cur.id);cur.ts=Date.now();if(i<0)plans.push(cur);else plans[i]=cur;SV('ms_zone_plans',plans);SV('ms_zone_prof',{teacher:cur.teacher,subject:cur.subject})}
+document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.new!=null){cur=blank();render();scrollTo(0,0)}
+ else if(d.open){cur=JSON.parse(JSON.stringify(plans.find(p=>p.id===d.open)));render();scrollTo(0,0)}
+ else if(d.dup){const p=JSON.parse(JSON.stringify(plans.find(p=>p.id===d.dup)));p.id=uid();p.title+=' (نسخة)';plans.push(p);SV('ms_zone_plans',plans);render()}
+ else if(d.del){if(confirm('حذف الخطة؟')){plans=plans.filter(p=>p.id!==d.del);SV('ms_zone_plans',plans);render()}}
+ else if(d.back!=null){persist();cur=null;render()}
+ else if(d.save!=null){persist();alert('تم حفظ الخطة')}
+ else if(d.word!=null){persist();try{await exportWord(cur)}catch(err){console.error(err);alert('تعذر إنشاء ملف Word: '+(err&&err.message||err))}}
+ else if(d.pdf!=null){persist();showPrint(cur)}
+ else if(d.ai!=null)aiDialog();
+ else if(d.aipaste!=null)aiPaste();
+ else if(d.aiapp){const tx=aiPrompt(cur);let ok=false;try{await navigator.clipboard.writeText(tx);ok=true}catch(e){}if(!ok){const ta=$('#aitx');if(ta){ta.select();try{document.execCommand('copy');ok=true}catch(e){}}}alert(ok?'تم نسخ النص. الصقه في محادثة '+b.dataset.nm+' (اضغط مطولاً ثم «لصق»).':'تعذر النسخ تلقائياً. حدد النص بالأسفل وانسخه يدوياً.');window.open(d.aiapp,'_blank')}
+});
+/* ===== الذكاء الاصطناعي (اختياري) ===== */
+function aiPrompt(p){const mins=MIN[p.dur]||MIN[45];
+ const cl=k=>OPT[k].map(x=>'"'+x+'"').join('، ');
+ return `أنت خبير مناهج ومعلم متمرس في مدارس دولة الإمارات العربية المتحدة (وزارة التربية والتعليم). المطلوب: إعداد خطة درس يومية جاهزة للتنفيذ باللغة العربية الفصحى المبسطة.
+
+بيانات الدرس:
+- المادة: ${p.subject||'—'}
+- الصف: ${p.grade||'—'} | المسار: ${p.track||'—'}
+- عنوان الوحدة: ${p.unit||'—'}
+- عنوان القسم/الموضوع: ${p.secTitle||'—'}
+- عنوان الدرس: ${p.title||'—'}
+- مدة الحصة: ${p.dur} دقيقة (توزيع المراحل الخمس بالدقائق: ${mins.join(' + ')})
+
+قواعد صارمة:
+1. لا يتوفر كتاب الطالب ولا دليل المعلم: لا تختلق أرقام صفحات ولا نصوصاً أو أنشطة منسوبة إلى الكتاب. اكتب موارد عامة (مثل: كتاب الطالب، محاكاة تفاعلية، فيديو قصير) دون أرقام صفحات.
+2. اعتمد على المفاهيم العلمية المستقرة المعروفة لهذا الموضوع في هذا الصف، وتحرَّ الدقة العلمية، ولا تضع معلومات لست متأكداً منها.
+3. لا تذكر أسماء طلاب أو بيانات شخصية.
+4. استخدم الأرقام الغربية (0123456789) فقط.
+5. اجعل كل حقل موجزاً وعملياً (نصوص قصيرة قابلة للطباعة في جدول)، ولا تتجاوز الحدود المذكورة.
+6. في حقول الخيارات (chk) اختر من القوائم أدناه حرفياً دون تعديل، واختر ما ينطبق فعلاً فقط.
+7. مراحل الحصة الخمس بالترتيب: التهيئة واستدعاء المعرفة السابقة، الاستقصاء وبناء الفكرة، النمذجة والتوضيح، التطبيق والممارسة، التقويم الختامي والغلق.
+8. أعد الرد كائن JSON واحداً فقط داخل كتلة كود، دون أي شرح قبله أو بعده.
+
+بنية JSON المطلوبة (المفاتيح كما هي بالإنجليزية والقيم بالعربية):
+{
+ "outcomes": ["3 إلى 4 نواتج تعلم قابلة للقياس، كل ناتج حتى 150 حرفاً"],
+ "prior": "المعرفة السابقة اللازمة (حتى 220 حرفاً)",
+ "objectives": ["2 إلى 3 أهداف، كل هدف حتى 140 حرفاً"],
+ "misc": "مفاهيم خاطئة شائعة لدى الطلاب في هذا الموضوع (حتى 220 حرفاً)",
+ "vocab": [{"term":"مصطلح","meaning":"معنى مبسط حتى 80 حرفاً"}],
+ "uae": "ربط الدرس بسياق دولة الإمارات (حتى 200 حرف)",
+ "resources": "موارد عامة بلا أرقام صفحات (حتى 200 حرف)",
+ "materials": "المواد والأدوات المطلوبة (حتى 180 حرفاً)",
+ "questions": ["سؤالان إلى 3 أسئلة رئيسة، كل سؤال حتى 45 حرفاً"],
+ "phases": [
+  {"t":"إجراء المعلم حتى 70 حرفاً","l":"نشاط المتعلم حتى 50 حرفاً","s":"الاستراتيجية حتى 35 حرفاً","q":"سؤال محوري حتى 55 حرفاً","e":"دليل النجاح حتى 45 حرفاً"}
+ ],
+ "as": {"d":"تقييم قبلي حتى 70 حرفاً","f":"تقييم تكويني حتى 70 حرفاً","p":"مهمة أداء حتى 75 حرفاً","w":"نشاط كتابي حتى 65 حرفاً","q":"اختبار قصير حتى 65 حرفاً","s":"تقييم تحصيلي حتى 75 حرفاً"},
+ "lang": "دعم اللغة حتى 100 حرف",
+ "diff": "تدريس متمايز حتى 120 حرفاً (مستوى داعم، مستوى متوسط، مستوى متقدم)",
+ "hw": "واجب منزلي حتى 90 حرفاً",
+ "support": "تيسيرات عامة للطلبة ذوي الاحتياجات الخاصة والموهوبين حتى 170 حرفاً (بلا تشخيص)",
+ "seat": "اختر واحداً حرفياً من: ${cl('seatingArrangement')}",
+ "refl": "سؤال تأمل بعد التنفيذ حتى 100 حرف",
+ "next": "الخطوة التالية المقترحة حتى 100 حرف",
+ "chk": {
+  "sciencePractices": ["اختر من: ${cl('sciencePractices')}"],
+  "scientificMethodSteps": ["اختر من: ${cl('scientificMethodSteps')}"],
+  "higherOrderSkills": ["اختر من: ${cl('higherOrderSkills')}"],
+  "competencies": ["اختر من: ${cl('competencies')}"],
+  "crossCurricularLinks": ["اختر من: ${cl('crossCurricularLinks')}"]
+ }
+}
+مصفوفة phases تحتوي خمسة عناصر بالضبط بالترتيب المذكور.`}
+function aiDialog(){const p=cur;if(!plain(p.title)||!plain(p.subject)||!p.grade){alert('اكتب المادة والصف وعنوان الدرس أولاً (والوحدة والقسم إن وُجدا).');return}
+ const apps=[['Claude','https://claude.ai/new'],['Gemini','https://gemini.google.com/app'],['ChatGPT','https://chatgpt.com/']];
+ const m=document.createElement('div');m.className='bx';m.innerHTML=`<div><h2>✨ تحضير بالذكاء الاصطناعي</h2><p class="mu"><b>تنبيه الخصوصية:</b> النص يحتوي بيانات الدرس العامة فقط. لا تضف إليه أسماء طلاب ولا معلومات شخصية.</p><p class="mu">اختر التطبيق: يُنسخ النص تلقائياً ويُفتح التطبيق، فتلصقه هناك.</p><div class="row">${apps.map(a=>`<button class="btn" data-aiapp="${a[1]}" data-nm="${a[0]}">${a[0]}</button>`).join('')}</div><details><summary>عرض النص / نسخه يدوياً</summary><textarea id="aitx" style="min-height:200px" readonly>${esc(aiPrompt(p))}</textarea></details><button class="btn g" style="width:100%;margin-top:10px" data-x>إغلاق</button></div>`;
+ m.onclick=e=>{if(e.target===m||(e.target.dataset&&e.target.dataset.x!=null))m.remove()};document.body.appendChild(m)}
+const TXT=(v,max)=>{if(v==null)return'';if(Array.isArray(v))v=v.map(x=>typeof x==='object'?Object.values(x).join(' — '):x).join('\n');return String(v).replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'').trim().slice(0,max||600)};
+function aiApply(j,p){const out=[];const put=(k,v)=>{if(v){setvOn(p,k,v);out.push(k)}};
+ put('outcomes',TXT(j.outcomes,900));put('prior',TXT(j.prior,400));put('objectives',TXT(j.objectives,700));put('misc',TXT(j.misc,400));
+ put('vocab',(Array.isArray(j.vocab)?j.vocab.map(x=>x&&typeof x==='object'?`${TXT(x.term,60)} — ${TXT(x.meaning,120)}`:TXT(x,160)).join('\n'):TXT(j.vocab,600)));
+ put('uae',TXT(j.uae,350));put('resources',TXT(j.resources,350));put('materials',TXT(j.materials,300));put('questions',TXT(j.questions,300));
+ if(Array.isArray(j.phases))PH.forEach((_,i)=>{const x=j.phases[i];if(x&&typeof x==='object'){p.ph[i]={t:TXT(x.t,160),l:TXT(x.l,120),s:TXT(x.s,80),q:TXT(x.q,120),e:TXT(x.e,100)};out.push('ph'+i)}});
+ if(j.as&&typeof j.as==='object')['d','f','p','w','q','s'].forEach(k=>{if(j.as[k]){p.as[k]=TXT(j.as[k],160);out.push('as.'+k)}});
+ put('lang',TXT(j.lang,220));put('diff',TXT(j.diff,260));put('hw',TXT(j.hw,200));put('support',TXT(j.support,320));put('refl',TXT(j.refl,220));put('next',TXT(j.next,220));
+ if(OPT.seatingArrangement.includes(j.seat)){p.seat=j.seat;out.push('seat')}
+ if(j.chk&&typeof j.chk==='object')Object.keys(OPTN).forEach(k=>{if(Array.isArray(j.chk[k])){p.chk[k]=j.chk[k].filter(x=>OPT[k].includes(x));out.push('chk.'+k)}});
+ return out}
+function setvOn(p,k,v){p[k]=v}
+function aiPaste(){const m=document.createElement('div');m.className='bx';m.innerHTML=`<div><h2>📥 لصق رد الذكاء الاصطناعي</h2><p class="mu">الصق الرد كاملاً (كتلة JSON). سيملأ الخانات، وما كتبته بنفسك في هذه الحقول سيُستبدل، فراجع بعدها.</p><textarea id="aipt" style="min-height:200px" placeholder="الصق هنا"></textarea><button class="btn" id="aiok">تعبئة الخطة</button><button class="btn g" style="width:100%;margin-top:6px" data-x>إغلاق</button></div>`;
+ m.onclick=e=>{if(e.target===m||(e.target.dataset&&e.target.dataset.x!=null))m.remove()};document.body.appendChild(m);
+ m.querySelector('#aiok').onclick=()=>{let t=m.querySelector('#aipt').value;const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a){alert('لم أجد بيانات JSON في النص. تأكد من لصق الرد كاملاً.');return}
+  let j;try{j=JSON.parse(t.slice(a,b+1))}catch(e){alert('الرد غير مكتمل أو فيه خطأ في الصيغة. اطلب من الذكاء الاصطناعي: «أعد الرد JSON صحيحاً فقط».');return}
+  const out=aiApply(j,cur);if(!out.length){alert('لم أتعرف على أي حقل في الرد.');return}persist();m.remove();render();alert('تمت تعبئة '+out.length+' حقلاً. راجع الخطة ثم صدّرها.')}}
+/* ===== نصوص ===== */
+const lines=s=>String(s||'').split(/\n/).map(x=>x.trim()).filter(Boolean);
+const bl=s=>lines(s).map(x=>'• '+x).join('\n');
+const plain=s=>String(s==null?'':s).replace(/[‎‏‪-‮⁦-⁩]/g,'').replace(/ /g,' ').trim();
+function compact(v,limit){const t=plain(v);if(t.length<=limit)return t;const c=t.slice(0,limit+1);let b=Math.max(...['؛','،','.','؟','!','\n'].map(m=>c.lastIndexOf(m)));if(b<limit*.65)b=c.lastIndexOf(' ',limit);if(b<limit*.55)b=limit;return t.slice(0,b).replace(/[ ،؛:\-]+$/,'')+'…'}
+const cp=(v,l)=>compact(String(v||'').replace(/\n/g,' '),l);
+function classText(p){return [p.grade?'الصف '+p.grade:'',p.track,p.section?'الشعبة '+p.section:''].filter(Boolean).join(' — ')||'____________'}
+function fmtDate(v){if(!v)return'____________';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:'____________'}
+function seq(p){const mins=MIN[p.dur]||MIN[45];let el=0;const out=[];PH.forEach((ph,i)=>{const x=p.ph[i],s=el,e=el+mins[i];el=e;out.push(`${s}–${e} د — ${ph[1]}: ${cp(x.t,70)}\nمتعلم: ${cp(x.l,50)}؛ استراتيجية: ${cp(x.s,35)}؛ سؤال: ${cp(x.q,55)}؛ دليل: ${cp(x.e,45)}`)});return{text:out.join('\n'),total:el,split:mins.join(' + ')}}
+/* ===== PDF / طباعة ===== */
+function showPrint(p){const mins=MIN[p.dur]||MIN[45],sq=seq(p);
+ const ck=k=>`<tr><th>${OPTN[k]}</th><td>${OPT[k].map(o=>((p.chk[k]||[]).includes(o)?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>`;
+ const nl=s=>esc(s).replace(/\n/g,'<br>');
+ $('#pv').innerHTML=`<div class="bar"><button class="btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button><button class="btn g" onclick="document.getElementById('pv').style.display='none'">إغلاق</button></div>
+ <h1>قالب تخطيط الدرس اليومي — ${esc(p.subject)} — ${esc(p.title)}</h1><div class="m">المادة: ${esc(p.subject)} | الصف: ${esc(classText(p))} | التاريخ: ${fmtDate(p.date)} | المعلم: ${esc(p.teacher)} | مدة الحصة: ${p.dur} دقيقة</div>
+ <table><tr><th style="width:22%">عنوان الوحدة</th><td colspan="3">${esc(p.unit||p.title)}</td></tr>
+ <tr><th>عنوان القسم</th><td colspan="3">${esc(p.secTitle||p.title)}</td></tr><tr><th>الموارد</th><td colspan="3">${nl(p.resources)}</td></tr><tr><th>المواد والأدوات</th><td colspan="3">${nl(p.materials)}</td></tr>
+ <tr><th>نواتج التعلم</th><td colspan="3">${nl(bl(p.outcomes))}</td></tr><tr><th>المعرفة السابقة</th><td colspan="3">${nl(p.prior)}</td></tr>
+ <tr><th>الأهداف</th><td colspan="3">${nl(bl(p.objectives))}</td></tr><tr><th>المفاهيم الخاطئة</th><td colspan="3">${nl(p.misc)}</td></tr><tr><th>المفردات</th><td colspan="3">${nl(p.vocab)}</td></tr>
+ ${Object.keys(OPTN).map(ck).join('')}<tr><th>الربط بالإمارات</th><td colspan="3">${nl(p.uae)}</td></tr></table>
+ <h2>خطة الحصة الدراسية</h2><table><tr><th>الأسئلة الرئيسة</th><td>${nl(bl(p.questions))}</td></tr>
+ <tr><th>مراحل الحصة (المدة ${sq.total} دقيقة: ${sq.split})</th><td><table><tr><th>الوقت</th><th>المرحلة</th><th>المعلم</th><th>المتعلم</th><th>الاستراتيجية</th><th>السؤال</th><th>دليل النجاح</th></tr>${PH.map((ph,i)=>{const x=p.ph[i],s=mins.slice(0,i).reduce((a,b)=>a+b,0);return `<tr><td>${s}–${s+mins[i]} د</td><td>${ph[1]}</td><td>${nl(x.t)}</td><td>${nl(x.l)}</td><td>${nl(x.s)}</td><td>${nl(x.q)}</td><td>${nl(x.e)}</td></tr>`}).join('')}</table></td></tr>
+ <tr><th>التقييم</th><td>التقييم القبلي: ${nl(p.as.d)}<br>التكويني: ${nl(p.as.f)}<br>مهمة أداء: ${esc(p.as.p)}<br>نشاط كتابي: ${esc(p.as.w)}<br>اختبار قصير: ${esc(p.as.q)}<br>التحصيلي: ${esc(p.as.s)}</td></tr>
+ <tr><th>دعم اللغة</th><td>${nl(p.lang)}</td></tr><tr><th>التدريس المتمايز</th><td>${nl(p.diff)}</td></tr><tr><th>الواجب المنزلي</th><td>${nl(p.hw)}</td></tr>
+ <tr><th>الطلبة المستهدفون والدعم</th><td>${nl(p.support)}</td></tr><tr><th>ترتيب الجلوس</th><td>${OPT.seatingArrangement.map(o=>(p.seat===o?'☑ ':'☐ ')+esc(o)).join(' &nbsp; ')}</td></tr>
+ <tr><th>التأمل الذاتي والخطوة التالية</th><td>${nl(p.refl)}<br>الخطوة التالية: ${nl(p.next)}</td></tr></table>`;
+ $('#pv').style.display='block';scrollTo(0,0)}
+/* ===== ZIP ===== */
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRCT[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+async function zipAll(buf){const b=new Uint8Array(buf),dv=new DataView(b.buffer);let e=b.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('قالب غير صالح');
+ let n=dv.getUint16(e+10,true),p=dv.getUint32(e+16,true);const out=[];
+ for(;n--;){const m=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),nm=new TextDecoder().decode(b.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+  const s=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true),raw=b.subarray(s,s+cs);let data;
+  if(m===0)data=raw.slice();else data=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+  out.push({name:nm,data})}return out}
+function zipWrite(files){const enc=new TextEncoder(),parts=[],cd=[];let off=0;
+ for(const f of files){const nm=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+  const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);lh.setUint16(10,0,true);lh.setUint16(12,0x21,true);lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);lh.setUint16(28,0,true);
+  parts.push(new Uint8Array(lh.buffer),nm,f.data);
+  const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);ch.setUint16(12,0,true);ch.setUint16(14,0x21,true);ch.setUint32(16,crc,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+  cd.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+sz}
+ const cdLen=cd.reduce((a,x)=>a+x.length,0),end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,cdLen,true);end.setUint32(16,off,true);
+ return new Blob([...parts,...cd,new Uint8Array(end.buffer)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})}
+/* ===== DOCX ===== */
+const WN='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const PORD='pStyle keepNext keepLines pageBreakBefore framePr widowControl numPr suppressLineNumbers pBdr shd tabs suppressAutoHyphens kinsoku wordWrap overflowPunct topLinePunct autoSpaceDE autoSpaceDN bidi adjustRightInd snapToGrid spacing ind contextualSpacing mirrorIndents suppressOverlap jc textDirection textAlignment textboxTightWrap outlineLvl divId cnfStyle rPr sectPr pPrChange'.split(' ');
+const RORD='rStyle rFonts b bCs i iCs caps smallCaps strike dstrike outline shadow emboss imprint noProof snapToGrid vanish webHidden color spacing w kern position sz szCs highlight u effect bdr shd fitText vertAlign rtl cs em lang eastAsianLayout specVanish oMath'.split(' ');
+const TORD='tcW gridSpan hMerge vMerge tcBorders shd noWrap tcMar textDirection tcFitText vAlign hideMark'.split(' ');
+let XD;
+const E=(n,a)=>{const x=XD.createElementNS(WN,'w:'+n);if(a)for(const k in a)x.setAttributeNS(WN,'w:'+k,a[k]);return x};
+const kids=(n,name)=>[...n.childNodes].filter(c=>c.nodeType===1&&c.localName===name);
+const kid=(n,name)=>kids(n,name)[0]||null;
+function ordIns(parent,child,order){const idx=order.indexOf(child.localName);const ex=kid(parent,child.localName);if(ex&&child.localName!=='rPr'){parent.replaceChild(child,ex);return child}
+ for(const c of [...parent.childNodes]){if(c.nodeType===1){const ci=order.indexOf(c.localName);if(ci>idx){parent.insertBefore(child,c);return child}}}parent.appendChild(child);return child}
+const gp=(p)=>kid(p,'pPr')||p.insertBefore(E('pPr'),p.firstChild);
+const grp=(r)=>kid(r,'rPr')||r.insertBefore(E('rPr'),r.firstChild);
+const ptext=p=>[...p.getElementsByTagNameNS(WN,'t')].map(t=>t.textContent).join('');
+function fillRun(r,text){[...r.childNodes].forEach(c=>{if(c.localName!=='rPr')r.removeChild(c)});String(text).split('\n').forEach((ln,i)=>{if(i)r.appendChild(E('br'));const t=E('t');t.setAttribute('xml:space','preserve');t.textContent=ln;r.appendChild(t)});
+ const rp=grp(r);['i','iCs'].forEach(n=>kids(rp,n).forEach(x=>rp.removeChild(x)));ordIns(rp,E('rtl'),RORD);const lg=E('lang',{val:'ar-AE',bidi:'ar-AE',eastAsia:'ar-AE'});ordIns(rp,lg,RORD)}
+function setPara(p,text,align){const runs=kids(p,'r');let r=runs[0];if(!r){r=E('r');p.appendChild(r)}runs.slice(1).forEach(x=>p.removeChild(x));
+ [...p.childNodes].forEach(c=>{if(c.localName==='hyperlink'||c.localName==='ins'||c.localName==='del')p.removeChild(c)});
+ fillRun(r,text);const pp=gp(p);ordIns(pp,E('bidi'),PORD);const oj=kid(pp,'jc');if(oj)pp.removeChild(oj);if(align==='center')ordIns(pp,E('jc',{val:'center'}),PORD);ordIns(pp,E('keepLines'),PORD)}
+const cellParas=tc=>kids(tc,'p');
+function setCell(tc,text,align){let ps=cellParas(tc);if(!ps.length){tc.appendChild(E('p'));ps=cellParas(tc)}setPara(ps[0],text,align);ps.slice(1).forEach(p=>tc.removeChild(p));
+ const tp=kid(tc,'tcPr')||tc.insertBefore(E('tcPr'),tc.firstChild);ordIns(tp,E('vAlign',{val:'top'}),TORD)}
+function appendCell(tc,text,align){const p=E('p');tc.appendChild(p);setPara(p,text,align);return p}
+function compactCell(tc,size){cellParas(tc).forEach(p=>{const pp=gp(p);ordIns(pp,E('spacing',{before:'0',after:'0',line:'240',lineRule:'auto'}),PORD);kids(p,'r').forEach(r=>{const rp=grp(r);ordIns(rp,E('sz',{val:String(Math.round(size*2))}),RORD);ordIns(rp,E('szCs',{val:String(Math.round(size*2))}),RORD)})})}
+function gridOf(tbl){const rows=kids(tbl,'tr'),g=[];rows.forEach((tr,ri)=>{const row=[];let i=0;kids(tr,'tc').forEach(tc=>{const tp=kid(tc,'tcPr'),gs=tp&&kid(tp,'gridSpan'),span=gs?+gs.getAttributeNS(WN,'val'):1,vm=tp&&kid(tp,'vMerge');let cell=tc;if(vm&&vm.getAttributeNS(WN,'val')!=='restart'&&ri>0&&g[ri-1][i])cell=g[ri-1][i];for(let k=0;k<span;k++)row[i++]=cell});g.push(row)});return{rows,g}}
+function markChecks(row,selected){const sel=selected.map(plain).filter(Boolean);new Set(row).forEach(tc=>{cellParas(tc).forEach(p=>{const t=plain(ptext(p));if(!t.includes('☐'))return;const opt=plain(t.replace('☐',''));if(sel.some(v=>v===opt||opt.includes(v)||v.includes(opt)))setPara(p,ptext(p).replace('☐','☑'),'right')})})}
+function labeled(tc,entries){const found=new Set();cellParas(tc).forEach(p=>{const cur=plain(ptext(p));for(const [k,v] of entries){if(cur.startsWith(k)){if(found.has(k))tc.removeChild(p);else{setPara(p,`${k}: ${v||'—'}`,'right');found.add(k)}break}}});entries.forEach(([k,v])=>{if(!found.has(k))appendCell(tc,`${k}: ${v||'—'}`,'right')})}
+async function exportWord(p){
+ const r=await fetch('ministry-lesson-template.docx?v=1');if(!r.ok)throw new Error('ملف القالب ministry-lesson-template.docx غير مرفوع إلى المستودع');
+ const files=await zipAll(await r.arrayBuffer());const doc=files.find(f=>f.name==='word/document.xml');
+ XD=new DOMParser().parseFromString(new TextDecoder().decode(doc.data),'application/xml');
+ const body=XD.getElementsByTagNameNS(WN,'body')[0],bk=[...body.childNodes].filter(n=>n.nodeType===1),paras=bk.filter(n=>n.localName==='p'),tbls=bk.filter(n=>n.localName==='tbl');
+ if(tbls.length<3)throw new Error('القالب غير مكتمل');
+ const sq=seq(p),title=plain(p.title),subj=plain(p.subject)||'____________';
+ if(paras[0])setPara(paras[0],`قالب تخطيط الدرس اليومي/الأسبوعي لمادة ${subj} — ${title}`,'center');
+ if(paras[1])setPara(paras[1],'تخطيط الدرس اليومي/الأسبوعي','center');
+ if(paras[2]){setPara(paras[2],`المادة: ${subj}    الصف/الفصل: ${classText(p)}\nبداية الأسبوع/التاريخ: ${fmtDate(p.date)}    المعلم: ${plain(p.teacher)||'____________'}    عدد الحصص في هذا الملف: 1`,'right');const pp=gp(paras[2]);ordIns(pp,E('spacing',{after:'0'}),PORD);kids(paras[2],'r').forEach(r=>{const rp=grp(r);ordIns(rp,E('sz',{val:'18'}),RORD);ordIns(rp,E('szCs',{val:'18'}),RORD)})}
+ [0,1,2].forEach(i=>{kids(tbls[i],'tr').forEach(tr=>{const tp=kid(tr,'trPr')||tr.insertBefore(E('trPr'),tr.firstChild);if(!kid(tp,'cantSplit'))tp.appendChild(E('cantSplit'))})});
+ const O=gridOf(tbls[0]).g,S=gridOf(tbls[1]),L=gridOf(tbls[2]);const sg=S.g,lg=L.g;
+ setCell(O[0][1],compact(p.unit||p.title,180));
+ setCell(O[1][1],`القسم 1: ${plain(p.secTitle)||plain(p.title)}\nالقسم 2: —`);
+ setCell(O[3][1],bl(p.outcomes).split('\n').map(x=>'• '+compact(x.replace(/^• /,''),180)).join('\n'));
+ setCell(O[4][1],compact(p.prior,260));
+ setCell(O[5][1],'القسم 1:\n'+bl(p.objectives)+'\nالقسم 2: —');
+ setCell(O[6][1],'القسم 1:\n'+compact(p.misc,240)+'\nالقسم 2: —');
+ setCell(O[7][1],'القسم 1:\n'+compact(p.vocab,300)+'\nالقسم 2: —');
+ ['sciencePractices','scientificMethodSteps','higherOrderSkills','competencies','crossCurricularLinks'].forEach((k,i)=>markChecks(O[8+i],p.chk[k]||[]));
+ setCell(O[13][1],compact(p.uae,240));
+ setCell(O[1][5],compact(p.resources,240));
+ setCell(O[2][5],compact(p.materials,200));
+ setCell(sg[0][0],'خطة الحصة الدراسية — الحصة 1 من 1','center');
+ setCell(sg[1][1],compact(bl(p.questions),160));compactCell(sg[1][1],10);
+ const strat=[...new Set(p.ph.map(x=>plain(x.s)).filter(Boolean))].join('، ');
+ appendCell(sg[2][0],'الاستراتيجيات المختارة: '+cp(strat,120));
+ appendCell(sg[2][1],'المراحل الخمس: التهيئة، الاستقصاء، النمذجة، التطبيق والممارسة، والتقويم الختامي.');compactCell(sg[2][1],9);
+ setCell(sg[2][3],`المدة الكلية: ${sq.total} دقيقة\nتوزيع المراحل: ${sq.split} دقيقة`);
+ labeled(sg[3][1],[['التقييم القبلي',cp(p.as.d,70)],['التقييم التكويني',cp(p.as.f,70)],['مهمة أداء',cp(p.as.p,75)],['نشاط كتابي',cp(p.as.w,65)],['اختبار قصير',cp(p.as.q,65)],['التقييم التحصيلي',cp(p.as.s,75)]]);compactCell(sg[3][1],8.5);
+ appendCell(sg[4][1],'تطبيقات دعم اللغة:\n'+cp(p.lang,100));appendCell(sg[5][1],'التمايز المقترح:\n'+cp(p.diff,120));setCell(sg[6][1],cp(p.hw,90));
+ [4,5,6].forEach(i=>compactCell(sg[i][1],10));
+ setCell(lg[0][0],'خطة الحصة الدراسية — الحصة 1 من 1','center');
+ setCell(lg[1][1],cp(p.ph[3].q,90));
+ appendCell(lg[2][0],'الاستراتيجيات المختارة: '+cp(strat,120));
+ appendCell(lg[2][1],'خطوات الحصة بالتوقيت:\n'+sq.text);compactCell(lg[2][1],9);
+ setCell(lg[2][3],`المدة الكلية: ${sq.total} دقيقة\nتوزيع المراحل: ${sq.split} دقيقة`);
+ appendCell(lg[7][1],'هدف التيسير لأصحاب الهمم:\n'+cp(p.support,170));compactCell(lg[7][1],8.5);
+ markChecks(lg[8],[p.seat||'']);
+ setCell(lg[9][1],`تأمل بعد التنفيذ: ${cp(p.refl,100)}\nالخطوة التالية: ${cp(p.next,100)}`);compactCell(lg[9][1],10);
+ // إزالة الصفوف المكررة
+ sg.slice(7,10).map(r=>r[0]).forEach((_,i)=>{const tr=S.rows[7+i];if(tr&&tr.parentNode)tr.parentNode.removeChild(tr)});
+ L.rows.slice(3,7).forEach(tr=>tr.parentNode&&tr.parentNode.removeChild(tr));
+ {let on=false;[...body.childNodes].forEach(n=>{if(n===tbls[1]){on=true;return}if(n===tbls[2])on=false;if(on&&n.nodeType===1&&n.localName==='p')body.removeChild(n)});
+  const sp=E('p'),sp2=gp(sp);sp2.appendChild(E('spacing',{before:'0',after:'0',line:'20',lineRule:'exact'}));const sr=E('r'),srp=E('rPr');srp.appendChild(E('sz',{val:'2'}));sr.appendChild(srp);sp.appendChild(sr);body.insertBefore(sp,tbls[2]);
+  const fp=cellParas(gridOf(tbls[2]).g[0][0])[0];ordIns(gp(fp),E('pageBreakBefore'),PORD)}
+ let after=false;[...body.childNodes].forEach(n=>{if(n===tbls[2]){after=true;return}if(after&&n.nodeType===1&&n.localName==='p'&&!ptext(n).trim()&&!n.getElementsByTagNameNS(WN,'br').length)body.removeChild(n)});
+ let xml=new XMLSerializer().serializeToString(XD);if(!xml.startsWith('<?xml'))xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+xml;
+ const FONT='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial" w:cs="Arial"/>';
+ const fix=s=>s.replace(/<w:rFonts\b[^>]*?\/>/g,FONT);
+ const enc=new TextEncoder(),dec=new TextDecoder();
+ const out=files.filter(f=>!f.name.startsWith('customXml/')||true).map(f=>{
+  if(f.name==='word/document.xml')return{name:f.name,data:enc.encode(fix(xml))};
+  if(/^word\/(styles|header\d*|footer\d*|numbering)\.xml$/.test(f.name))return{name:f.name,data:enc.encode(fix(dec.decode(f.data)))};
+  return f});
+ const blob=zipWrite(out),fn='lesson-plan-'+(p.date||'')+(p.grade?'-g'+p.grade:'')+(p.section?'-s'+String(p.section).replace(/[^\w]/g,''):'')+'.docx';
+ const file=new File([blob],fn,{type:blob.type});
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:fn});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),800)}
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
