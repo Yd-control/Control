@@ -130,7 +130,7 @@ function vLab(){
  const head=`<div class="card"><h2>🧪 مختبري</h2><p class="mu">نسخة محلية تُحدَّث من النسخة المستقلة: صدّر نسخة من تطبيق مختبري، ثم استوردها هنا.</p>
  <button class="btn" data-lab-imp>📥 استيراد من النسخة المستقلة</button> ${LAB?'<button class="btn g" data-lab-exp>📤 تصدير نسخة</button>':''}</div>`;
  if(!LAB)return head+'<div class="card mu">لم تُستورد بيانات بعد.</div>';
- const D=LAB,T=[['today','اليوم'],['stat','إحصائيات'],['exp','التجارب'],['mat','المواد'],['sds','السلامة SDS'],['ast','الأدوات'],['vis','الزيارات'],['prep','التحضير'],['ref','مراجع']];
+ const D=LAB,T=[['today','اليوم'],['doc','المستندات'],['stat','إحصائيات'],['exp','التجارب'],['mat','المواد'],['plan','الخطة'],['sup','التزويد'],['sds','السلامة SDS'],['ast','الأدوات'],['vis','الزيارات'],['prep','التحضير'],['ref','مراجع']];
  const seg=`<div class="seg">${T.map(t=>`<button data-lt="${t[0]}" class="${labT===t[0]?'on':''}">${t[1]}</button>`).join('')}</div>`;
  let b='';const q=W(labQ).trim().toLowerCase(),has=(...f)=>!q||f.some(x=>String(x||'').toLowerCase().includes(q));
  if(labT==='today'){const t=ymd(new Date()),r=todayRows(t),v=(D.visits||[]).filter(x=>x.date===t),p=(D.preps||[]).filter(x=>x.date===t);
@@ -141,16 +141,59 @@ function vLab(){
  else if(labT==='exp'){const l=(D.experiments||[]).filter(x=>(!labG||String(x.grade)===labG)&&has(x.title,x.titleEnglish,x.subject,x.requirements));
   b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في التجارب…"><select id="lg"><option value="">كل الصفوف</option>${[...new Set((D.experiments||[]).map(x=>String(x.grade)))].sort().map(g=>`<option ${g===labG?'selected':''}>${g}</option>`).join('')}</select><div class="mu">${l.length} تجربة</div></div>`+l.slice(0,60).map(x=>`<div class="card"><b>${esc(x.title)}</b><div class="mu">${esc(x.titleEnglish||'')}</div><span class="tag">صف ${esc(x.grade)}</span><span class="tag">${esc(x.track||'')}</span><span class="tag">${esc(x.subject)}</span><span class="tag">فصل ${esc(x.term)}</span><pre class="mu">${esc(x.requirementsArabic||x.requirements||'')}</pre></div>`).join('')+(l.length>60?'<div class="mu">اكتب في البحث لتضييق النتائج…</div>':'')}
  else if(labT==='mat'){const now=new Date().toISOString().slice(0,7),l=(D.materials||[]).filter(x=>has(x.name,x.english,x.location));
-  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في المواد والأدوات…"><div class="mu">${l.length} عنصر</div></div>`+l.slice(0,80).map(x=>{const ex=(x.expiryMonth||'').slice(0,7),st=ex&&ex<now?'bad':'';return `<div class="card"><b>${esc(x.name)}</b><div class="mu">${esc(x.english||'')}</div>${x.sdsId?`<button class="btn g" data-sds="${esc(x.sdsId)}">📄 صحيفة السلامة</button>`:''}<span class="tag">${x.kind==='chemical'?'مادة':'أداة'}</span><span class="tag">${esc(x.opening)} ${esc(x.unit||'')}</span>${ex?`<span class="tag ${st}">انتهاء ${ex}</span>`:''}${x.location?`<span class="tag">${esc(x.location)}</span>`:''}</div>`}).join('')}
+  b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في المواد والأدوات…"><div class="mu">${l.length} عنصر</div></div>`+l.slice(0,80).map(x=>{const ex=(x.expiryMonth||'').slice(0,7),st=ex&&ex<now?'bad':'';return `<div class="card"><b>${esc(x.name)}</b><div class="mu">${esc(x.english||'')}</div>${x.sdsId?`<button class="btn g" data-sds="${esc(x.sdsId)}">📄 صحيفة السلامة</button>`:''}${(()=>{const m=msFor(x.name)||msFor(x.english);return m?msBtn(m[1])||`<span class="tag">MSDS ص ${m[1]}</span>`:''})()}<span class="tag">${x.kind==='chemical'?'مادة':'أداة'}</span><span class="tag">${esc(x.opening)} ${esc(x.unit||'')}</span>${ex?`<span class="tag ${st}">انتهاء ${ex}</span>`:''}${x.location?`<span class="tag">${esc(x.location)}</span>`:''}</div>`}).join('')}
  else if(labT==='stat')b=labStats(D);
- else if(labT==='sds'){const l=refs('sds').filter(r=>has(r.title,fv(r,'CAS الخاص بالصحيفة المرجعية'),r.id));b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث باسم المادة أو CAS…"><div class="mu">${l.length} صحيفة</div></div>`+l.map(r=>`<div class="card"><b>${esc(r.title)}</b> <span class="tag">${esc(r.id)}</span><div class="mu">CAS: ${esc(fv(r,'CAS الخاص بالصحيفة المرجعية'))||'—'} · ${esc(fv(r,'الصيغة كما وردت'))}</div><button class="btn g" data-sds="${esc(r.id)}">عرض التفاصيل</button></div>`).join('')}
+ else if(labT==='plan')b=labPlan();
+ else if(labT==='sup')b=labSupply();
+ else if(labT==='doc'){const l=DOCS.filter(x=>has(x.name,x.text));b=`<div class="card"><h2>📚 المستندات</h2><p class="mu">استورد ملفات Word أو PDF (دليل السلامة، نماذج، تعاميم) لتبقى على جهازك وتُبحث نصاً.</p><button class="btn" data-doc-imp>📥 إضافة مستند</button><input id="lq" value="${esc(labQ)}" placeholder="ابحث في أسماء المستندات ومحتواها…"></div>`+l.map(x=>`<div class="card"><b>${esc(x.name)}</b> <span class="tag">${x.type}</span><div class="mu">${x.text?x.text.length+' حرف':(x.size>>10)+' KB'}</div><button class="btn g" data-doc-open="${x.id}">فتح</button> <button class="btn r" data-doc-del="${x.id}">🗑️</button></div>`).join('')}
+ else if(labT==='sds'){const l=refs('sds').filter(r=>has(r.title,fv(r,'CAS الخاص بالصحيفة المرجعية'),r.id));const ml=MS.filter(m=>has(m[0]));
+  b=`<div class="card"><h2>📘 ملف MSDS الشامل (PDF)</h2>${MSURL?'<div class="ok">الملف محفوظ على جهازك</div>':'<p class="mu">استورد ملف الأمن والسلامة (PDF) مرة واحدة ليُحفظ على جهازك ويُفتح عند الصفحة المطلوبة.</p>'}<button class="btn" data-ms-imp>${MSURL?'🔄 استبدال الملف':'📥 استيراد ملف MSDS'}</button></div>
+  <div class="card"><h2>فهرس الملف</h2><div class="mu">${ml.length} مادة</div>${ml.map(m=>`<div class="it"><div class="row"><span style="flex:3">${esc(m[0])} <span class="tag">ص ${m[1]}</span></span>${MSURL?`<button class="btn g" style="flex:0;white-space:nowrap" data-msp="${m[1]}">فتح</button>`:''}</div></div>`).join('')}</div>
+  <div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث باسم المادة أو CAS…"><div class="mu">${l.length} صحيفة</div></div>`+l.map(r=>`<div class="card"><div class="row" style="flex-wrap:nowrap">${bottle(sdsEn(r.id)||r.title,r.id)}<div style="flex:3"><b>${esc(r.title)}</b> <span class="tag">${esc(r.id)}</span><div class="mu">CAS: ${esc(fv(r,'CAS الخاص بالصحيفة المرجعية'))||'—'} · ${esc(fv(r,'الصيغة كما وردت'))}</div><button class="btn g" data-sds="${esc(r.id)}">عرض التفاصيل</button></div></div></div>`).join('')}
  else if(labT==='ast'){const l=refs('assets').filter(r=>has(r.title,fv(r,'المختبر الأصلي')));b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في الأدوات والأجهزة…"><div class="mu">${l.length} صنف</div></div>`+l.slice(0,80).map(r=>`<div class="card"><b>${esc(r.title)}</b><div><span class="tag">${esc(fv(r,'المختبر الأصلي'))}</span><span class="tag">العدد ${esc(fv(r,'العدد الأصلي'))}</span><span class="tag">${esc(fv(r,'الحالة الأصلية'))}</span></div></div>`).join('')+(l.length>80?'<div class="mu">اكتب في البحث لتضييق النتائج…</div>':'')}
- else if(labT==='ref'){const ks=[...new Set((D.references||[]).map(r=>r.kind))].filter(k=>k!=='sds'&&k!=='assets');const KN={timeline:'الجدول الزمني',operating:'التشغيل',competencies:'الكفايات',safety:'السلامة',goals:'الأهداف',administration:'الإدارة',safetyguide:'دليل السلامة',supply:'التوريد'};b=ks.map(k=>`<div class="card"><h2>${KN[k]||k}</h2>${refs(k).map(r=>`<button class="btn g" style="width:100%;text-align:right" data-ref="${esc(r.id)}">${esc(r.title)}</button>`).join('')}</div>`).join('')}
+ else if(labT==='ref'){const ks=[...new Set((D.references||[]).map(r=>r.kind))].filter(k=>k!=='sds'&&k!=='assets');const sl=refs('safety');b=`<div class="card"><h2>✅ سجل فحص السلامة</h2><p class="mu">سجّل نتيجة كل بند: التاريخ والمختبر والنتيجة والإجراء والمسؤول وموعد الإغلاق.</p>${sl.map(r=>{const s=SAFE[r.id]||{};return `<button class="btn g" style="width:100%;text-align:right" data-saf="${esc(r.id)}">${esc(r.title)} ${s.res?'<span class="tag '+(s.res==='مطابق'?'ok':'bad')+'">'+esc(s.res)+'</span>':'<span class="tag">لم يُفحص</span>'}${s.date?'<span class="tag">'+esc(s.date)+'</span>':''}</button>`}).join('')}</div>`;const KN={timeline:'الجدول الزمني',operating:'التشغيل',competencies:'الكفايات',safety:'السلامة',goals:'الأهداف',administration:'الإدارة',safetyguide:'دليل السلامة',supply:'التوريد'};b+=ks.map(k=>`<div class="card"><h2>${KN[k]||k}</h2>${refs(k).map(r=>`<button class="btn g" style="width:100%;text-align:right" data-ref="${esc(r.id)}">${esc(r.title)}</button>`).join('')}</div>`).join('')}
  else if(labT==='vis'){const l=(D.visits||[]).filter(x=>has(x.teacher,x.title,x.subject,x.lab)).sort((a,b)=>(a.date||'z')<(b.date||'z')?-1:1);
   b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في الزيارات…"><div class="mu">${l.length} زيارة</div></div>`+l.slice(0,80).map(x=>`<div class="card">${visIt(x)}</div>`).join('')}
  else{const l=(D.preps||[]).filter(x=>has(x.title,x.lesson,x.teacher)).sort((a,b)=>(a.date||'')<(b.date||'')?1:-1);
   b=`<div class="card"><input id="lq" value="${esc(labQ)}" placeholder="ابحث في التحضيرات…"><div class="mu">${l.length} تحضير</div></div>`+l.map(x=>`<div class="card">${prepIt(x)}<pre class="mu">${esc((x.requirements||'').slice(0,500))}</pre></div>`).join('')}
  return head+seg+b}
+const MS=[['إرشادات الأمن والسلامة',4],['رمز الخطر',6],['محلول الأمونيا',7],['الجليسرول',9],['شمع البرافين',12],['الإيثانول',14],['فوق أكسيد الهيدروجين',16],['الميثانول',18],['البروبانول',20],['الهكسان',23],['الهكسين',26],['حمض النيتريك',28],['حمض الهيدروكلوريك',30],['حمض الكبريتيك',32],['حمض الأسيتيك',34],['نترات البوتاسيوم',37],['نترات الرصاص',40],['ثاني كرومات البوتاسيوم',43],['كلوريد البوتاسيوم',46],['كلوريد الكالسيوم',49],['كلوريد الباريوم',51],['كلوريد الرصاص الثنائي',53],['كلوريد الفضة',55],['كلوريد الخارصين',58],['كلوريد الأمونيوم',60],['بيرمنجنات البوتاسيوم',62],['ثاني أكسيد المنجنيز',64],['ثاني أكسيد التيتانيوم',66],['كبريتات الخارصين',69],['كبريتات الألومنيوم',71],['كبريتات النحاس',73],['كبريتات الصوديوم',75],['هيدروكسيد الباريوم',77],['هيدروكسيد المغنيسيوم',79],['هيدروكسيد البوتاسيوم',81],['هيدروكسيد الصوديوم',83],['هيدروكسيد الأمونيوم',86],['يوديد البوتاسيوم',88],['يوديد الرصاص الثنائي',90],['كربونات الكالسيوم',92],['كربونات السترانشيوم',94],['كربونات الليثيوم',96],['فينول فيثالين',98],['الميثيل البرتقالي',100],['اليود',103],['محلول فهلنج 1',106],['محلول فهلنج 2',107],['حمض البنزويك',108],['أسيتات الصوديوم المائية',110],['بودرة الكبريت',112],['الأسيتيلين',127],['البروم',128],['ميثيل إيثيل كيتون',129],['ثنائي إيثانول أمين',130],['أمونيا',132],['حمض الفسفوريك',134],['ثاني أكسيد الكبريت',135],['يوريا',136],['أوكتان',138],['أسيتون',140],['كبريتيد الهيدروجين',141],['الفينول',142],['ثنائي كلورو إيثيلين',145],['أول أكسيد الكربون',146],['كيروسين',147],['كبريت',148],['هيبو كلوريت الصوديوم',149],['كلوريد الألومنيوم',150],['ميثان',151],['بنتان',152],['بنزول',153],['أكسجين',154],['كلوروبنزين',155],['حمض الهيدروفلوريك',156],['حمض الهيدروكلوريك اللامائي',158],['تولوين',159],['هيدرازين',160],['سولار',161],['سلفولان',162],['ثنائي ميثيل ثنائي الكبريت',163],['ثنائي كلورو البروبيلين',164],['هيدروجين',165],['ايزوأوكتان',166],['رغوة الحريق',168],['بنزين',169],['بيوتان',170],['مازوت',171],['هيدروكسيد الكالسيوم',172],['إسفلت',173]];
+const nz=s=>String(s||'').replace(/[ًٌٍَُِّْ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[()|\-]/g,' ').replace(/\s+/g,' ').trim();
+let MSURL=null;
+const msFor=n=>{const a=nz(n);if(a.length<3)return null;return MS.find(m=>nz(m[0])===a)||MS.find(m=>{const b=nz(m[0]);return b.length>=5&&(a.includes(b)||b.includes(a))})||null};
+async function msLoad(){if(MSURL)return;const b=await idbGet('msds').catch(()=>null);if(b){MSURL=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));render()}}
+const msBtn=p=>MSURL?`<button class="btn g" data-msp="${p}">📘 فتح في ملف MSDS (ص ${p})</button>`:'';
+let DOCS=[];
+async function docsLoad(){const m=await idbGet('docs').catch(()=>null);DOCS=m||[]}
+async function docsSave(){await idbSet('docs',DOCS)}
+const docBuf={};
+const bottle=(t,id)=>{const s=String(t||'').slice(0,22).replace(/[&<>"]/g,'');return `<svg viewBox="0 0 120 150" width="84" height="105" style="flex:none"><rect x="42" y="4" width="36" height="20" rx="4" fill="#222"/><path d="M46 24h28v14c14 6 24 18 24 34v62c0 8-6 14-14 14H36c-8 0-14-6-14-14V72c0-16 10-28 24-34z" fill="#8a4a1c"/><rect x="28" y="70" width="64" height="46" rx="3" fill="#efe9dc"/><rect x="28" y="70" width="64" height="4" fill="#0e4b52"/><text x="60" y="88" font-size="7.5" text-anchor="middle" fill="#111" font-family="sans-serif" direction="ltr">${s}</text><text x="60" y="110" font-size="5" text-anchor="middle" fill="#555" font-family="sans-serif">MSDS REF · ${id||''}</text></svg>`};
+const sdsEn=id=>{const m=(LAB.materials||[]).find(x=>x.sdsId===id);return m&&m.english?m.english:''};
+const SAFEK='ms_safety';let SAFE=LS(SAFEK,{});
+const PCAT=['التحضير والتجهيز','الأمن والسلامة','الجرد وتنظيم العهدة','فحص الأجهزة والصيانة','التزويد والمشتريات','التوثيق وMSDS','تنظيم المختبر','أعمال أخرى'],PST=['لم يبدأ','جاري','منجز','متأخر'];
+let PLAN=LS('ms_plan',{}),PTASKS=LS('ms_ptasks',[]),planC='';
+function labPlan(){const it=[];
+ refs('operating').forEach(r=>{const p=PLAN[r.id]||{};it.push({id:r.id,cat:p.cat||'الخطة التشغيلية السنوية',t:r.title,sub:fv(r,'الهدف التشغيلي'),meta:[fv(r,'المنفذون'),fv(r,'الفترة الأصلية')].filter(Boolean).join(' · '),st:p.st||'',src:'خطة'})});
+ PTASKS.forEach(t=>it.push({id:t.id,cat:t.cat,t:t.t,sub:t.n,meta:[t.who,t.due].filter(Boolean).join(' · '),st:t.st||'لم يبدأ',src:'مضاف',own:1}));
+ const sl=refs('safety');sl.forEach(r=>{const s=SAFE[r.id];if(s&&s.res&&s.res!=='مطابق')it.push({id:'S_'+r.id,cat:'الأمن والسلامة',t:'معالجة ملاحظة: '+r.title,sub:s.act||'',meta:[s.lab,s.who,s.due].filter(Boolean).join(' · '),st:'جاري',src:'من سجل الفحص',auto:1})});
+ const cats=['الخطة التشغيلية السنوية',...PCAT],l=it.filter(x=>!planC||x.cat===planC);
+ return `<div class="card"><h2>الخطة التشغيلية لأعمال المختبر</h2><p class="mu">أعمال التحضير والسلامة والجرد والتزويد والتوثيق. تُضاف إليها ملاحظات فحص السلامة غير المطابقة تلقائياً.</p>
+ <select id="pc"><option value="">جميع الأعمال</option>${cats.map(c=>`<option ${c===planC?'selected':''}>${c}</option>`).join('')}</select>
+ <button class="btn" data-pl-add>➕ إضافة عمل تشغيلي</button></div>`+(l.length?l.map(x=>`<div class="card"><div class="mu">${esc(x.cat)} <span class="tag">${x.src}</span></div><b>${esc(x.t)}</b>${x.sub?'<div class="mu">'+esc(x.sub)+'</div>':''}${x.meta?'<div class="mu">'+esc(x.meta)+'</div>':''}<div class="row" style="margin-top:6px"><select data-pl-st="${x.id}" ${x.auto?'disabled':''}><option value="">الحالة</option>${PST.map(s=>`<option ${s===x.st?'selected':''}>${s}</option>`).join('')}</select>${x.own?`<button class="btn r" style="flex:0" data-pl-del="${x.id}">🗑️</button>`:''}${x.auto?`<button class="btn g" data-go-ref>فتح السجل</button>`:''}</div></div>`).join(''):'<div class="card mu">لا توجد أعمال.</div>')}
+let QUOTES=LS('ms_quotes',[]);const QST=['عرض سعر','معتمد','تم الطلب','مستلم','ملغى'];
+const money=v=>Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const qTot=q=>{const g=(q.items||[]).reduce((s,i)=>s+(+i.gross||0),0),v=(q.items||[]).reduce((s,i)=>s+(+i.vat||0),0);return{g,v,t:g+v}};
+function labSupply(){const sp=refs('supply').filter(r=>fv(r,'رمز الطلب'));const plan=refs('supply').find(r=>!fv(r,'رمز الطلب'));
+ const tot=QUOTES.reduce((s,q)=>s+qTot(q).t,0);
+ return `<div class="card"><h2>🛒 الخطة التزويدية</h2><p class="mu">عروض الأسعار وطلبات الشراء للمواد والأدوات. أرفق ملف العرض (PDF) وتابع حالته.</p>
+ <div><span class="tag">${QUOTES.length} عرض</span><span class="tag">الإجمالي مع الضريبة ${money(tot)} د.إ</span></div>
+ <button class="btn" data-q-imp>📥 استيراد عرض سعر</button> <button class="btn g" data-q-new>➕ عرض يدوي</button></div>`
+ +QUOTES.map(q=>{const t=qTot(q);return `<div class="card"><b>${esc(q.supplier)}</b> <span class="tag">رقم ${esc(q.no)}</span><div class="mu">${esc(q.date||'')} · ${(q.items||[]).length} صنف · ${(q.items||[]).reduce((s,i)=>s+(+i.qty||0),0)} قطعة</div>
+ <div class="mu">قبل الضريبة ${money(t.g)} · الضريبة ${money(t.v)}</div><div class="big" style="font-size:26px">${money(t.t)} <span class="mu">د.إ</span></div>
+ <select data-q-st="${q.id}">${QST.map(s=>`<option ${s===q.status?'selected':''}>${s}</option>`).join('')}</select>
+ <div class="row"><button class="btn g" data-q-view="${q.id}">📋 الأصناف</button>${q.docId&&DOCS.find(x=>x.id===q.docId)?`<button class="btn g" data-q-pdf="${q.id}">📄 فتح PDF</button>`:`<button class="btn g" data-q-att="${q.id}">📎 إرفاق PDF</button>`}<button class="btn r" data-q-del="${q.id}" style="flex:0">🗑️</button></div></div>`}).join('')
+ +(sp.length?`<div class="card"><h2>طلبات مسجلة في الخطة</h2>${sp.map(r=>`<div class="it"><b>${esc(r.title)}</b><div class="mu">المطلوب ${esc(fv(r,'المطلوب'))} ${esc(fv(r,'الوحدة'))} · ${esc(fv(r,'طريقة التوفير'))} · ${esc(fv(r,'التكلفة الإجمالية بالدرهم'))} د.إ</div></div>`).join('')}</div>`:'')
+ +(plan?`<div class="card"><h2>${esc(plan.title)}</h2><button class="btn g" data-ref="${esc(plan.id)}">عرض تفاصيل الخطة</button></div>`:'')}
 const refs=k=>(LAB.references||[]).filter(r=>r.kind===k);
 const fl=r=>{try{return JSON.parse(r.fields||'[]')}catch(e){return[]}};
 const fv=(r,l)=>{const f=fl(r).find(x=>x.label===l);return f?f.value:''};
@@ -165,7 +208,7 @@ function labStats(D){const now=new Date().toISOString().slice(0,7),by=(a,f)=>a.r
  <div class="card"><h2>الزيارات حسب المعلم</h2>${bars(by(D.visits||[],x=>x.teacher))}</div>
  <div class="card"><h2>الزيارات حسب الشهر</h2>${bars(by(D.visits||[],x=>(x.date||'').slice(0,7)))}</div>
  <div class="card"><h2>حصص الجدول الأسبوعي حسب المختبر</h2>${bars(by(D.weeklyRows||[],x=>x.lab))}</div>`}
-function showRef(r){const f=fl(r).filter(x=>x.value&&String(x.value).trim());modal('<h2>'+esc(r.title)+'</h2>'+f.map(x=>`<div class="it"><div class="mu">${esc(x.label)}</div><pre>${esc(String(x.value).slice(0,1500))}</pre></div>`).join('')+(fl(r).some(x=>/^https?:/.test(x.value))?'':''))}
+function showRef(r){const f=fl(r).filter(x=>x.value&&String(x.value).trim());modal('<h2>'+esc(r.title)+'</h2>'+(r.kind==='sds'?'<div style="text-align:center">'+bottle(sdsEn(r.id)||r.title,r.id)+'<div class="mu">تمثيل تقريبي وليس صورة حقيقية للمادة</div></div>':'')+f.map(x=>`<div class="it"><div class="mu">${esc(x.label)}</div><pre>${esc(String(x.value).slice(0,1500))}</pre></div>`).join('')+(fl(r).some(x=>/^https?:/.test(x.value))?'':''))}
 const visIt=x=>`<div class="it"><b>${esc(x.title||'(بدون عنوان)')}</b><div class="mu">${esc(x.teacher)} · ${esc(x.subject||'')} · ${x.grade?'صف '+esc(x.grade):''} ${esc(x.track||'')} ${x.section?'· شعبة '+esc(x.section):''}</div><span class="tag">${x.date?fmtD(x.date):'بلا تاريخ'}</span><span class="tag">${x.period?'حصة '+esc(x.period):''}</span><span class="tag">${esc(x.lab||'')}</span></div>`;
 const prepIt=x=>`<div class="it"><b>${esc(x.title)}</b><div class="mu">${esc(x.lesson||'')} · ${esc(x.teacher||'')}</div><span class="tag">${x.date?fmtD(x.date):''}</span><span class="tag">${esc(x.status||'')}</span></div>`;
 function remText(){const t=ymd(new Date()),v=(LAB.visits||[]).filter(x=>x.date===t&&x.title);if(!v.length)return '';
@@ -174,6 +217,7 @@ function remText(){const t=ymd(new Date()),v=(LAB.visits||[]).filter(x=>x.date==
 function render(){nav();const m=$('#m');
  m.innerHTML=({home:vHome,ag:vAg,sc:vSc,wd:vWd,lab:vLab}[tab]||vHome)();
  clearInterval(tick);if(tab==='home'){clock();tick=setInterval(clock,1000);labToday()}
+ if(tab==='lab'){msLoad();if(!window.__dl){window.__dl=1;docsLoad().then(()=>{if(tab==='lab'&&(labT==='doc'||labT==='sup'))render()})}}
  if(tab==='lab'&&!LAB)idbGet('lab').then(v=>{if(v){LAB=v;render()}}).catch(()=>{})}
 /* ===== الأحداث ===== */
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
@@ -194,6 +238,27 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
  else if(d.seSh){const x=sec[secOpen].find(x=>x.id===d.seSh);shareTxt(x.t+'\n'+x.x)}
  else if(d.sds){const r=refs('sds').find(x=>x.id===d.sds);r?showRef(r):alert('لا توجد تفاصيل لهذه الصحيفة')}
  else if(d.ref){showRef((LAB.references||[]).find(x=>x.id===d.ref))}
+ else if(d.msImp!=null){const f=await pickFile('application/pdf,.pdf');if(!f)return;try{await idbSet('msds',await f.arrayBuffer());if(MSURL)URL.revokeObjectURL(MSURL);MSURL=null;await msLoad();alert('تم حفظ ملف MSDS')}catch(e){alert('تعذر حفظ الملف')}}
+ else if(d.msp){if(MSURL){window.open(MSURL+'#page='+d.msp,'_blank')}}
+ else if(d.docImp!=null){const f=await pickFile('.docx,.pdf');if(!f)return;const nm=f.name.replace(/\.[^.]+$/,'');
+  try{let o;if(/\.pdf$/i.test(f.name)){const ab=await f.arrayBuffer();o={id:uid(),name:nm,type:'PDF',size:ab.byteLength,buf:ab}}else if(/\.docx$/i.test(f.name)){const tx=await docxText(f);o={id:uid(),name:nm,type:'Word',size:tx.length,text:tx}}else{alert('الأنواع المدعومة: docx و pdf');return}
+   DOCS.push(o);await docsSave();render();alert('أُضيف المستند')}catch(e){alert('تعذرت قراءة المستند')}}
+ else if(d.docDel){if(confirm('حذف المستند؟')){DOCS=DOCS.filter(x=>x.id!==d.docDel);await docsSave();render()}}
+ else if(d.docOpen){const x=DOCS.find(y=>y.id===d.docOpen);if(!x)return;if(x.buf){const u=URL.createObjectURL(new Blob([x.buf],{type:'application/pdf'}));window.open(u,'_blank')}else{const q=W(labQ).trim();const b=modal('<h2>'+esc(x.name)+'</h2><pre style="max-height:60vh;overflow:auto">'+esc(x.text.slice(0,60000))+'</pre>');}}
+ else if(d.saf){const r=refs('safety').find(x=>x.id===d.saf),s=SAFE[d.saf]||{};const L=['مختبر الأحياء','العلوم المتكاملة','الفيزياء','الكيمياء'];
+  const m=modal(`<h2>${esc(r.title)}</h2><label class="mu">تاريخ الفحص</label><input id="sf_d" type="date" value="${esc(s.date||ymd(new Date()))}"><label class="mu">المختبر</label><select id="sf_l"><option value="">—</option>${L.map(x=>`<option ${x===s.lab?'selected':''}>${x}</option>`).join('')}</select><label class="mu">النتيجة</label><select id="sf_r"><option value="">—</option>${['مطابق','غير مطابق','يحتاج متابعة'].map(x=>`<option ${x===s.res?'selected':''}>${x}</option>`).join('')}</select><label class="mu">الإجراء المطلوب</label><textarea id="sf_a">${esc(s.act||'')}</textarea><label class="mu">المسؤول</label><input id="sf_w" value="${esc(s.who||'')}"><label class="mu">موعد الإغلاق</label><input id="sf_c" type="date" value="${esc(s.due||'')}"><button class="btn" id="sf_ok">حفظ</button>`);
+  m.querySelector('#sf_ok').onclick=()=>{SAFE[d.saf]={date:m.querySelector('#sf_d').value,lab:m.querySelector('#sf_l').value,res:m.querySelector('#sf_r').value,act:m.querySelector('#sf_a').value,who:m.querySelector('#sf_w').value,due:m.querySelector('#sf_c').value};SV(SAFEK,SAFE);m.remove();render()}}
+ else if(d.plAdd!=null){const m=modal(`<h2>عمل تشغيلي جديد</h2><input id="pt" placeholder="العمل"><select id="pcat">${PCAT.map(c=>`<option>${c}</option>`).join('')}</select><input id="pw" placeholder="المسؤول"><label class="mu">موعد الإنجاز</label><input id="pd" type="date"><textarea id="pn" placeholder="ملاحظات"></textarea><button class="btn" id="pok">حفظ</button>`);
+  m.querySelector('#pok').onclick=()=>{const t=m.querySelector('#pt').value.trim();if(!t)return;PTASKS.push({id:uid(),t,cat:m.querySelector('#pcat').value,who:m.querySelector('#pw').value,due:m.querySelector('#pd').value,n:m.querySelector('#pn').value,st:'لم يبدأ'});SV('ms_ptasks',PTASKS);m.remove();render()}}
+ else if(d.plDel){PTASKS=PTASKS.filter(x=>x.id!==d.plDel);SV('ms_ptasks',PTASKS);render()}
+ else if(d.goRef!=null){labT='ref';render()}
+ else if(d.qImp!=null){const f=await pickFile('.json,application/json');if(!f)return;try{const j=JSON.parse(await f.text());const q=j.quote;if(j.app!=='ms-quote'||!q||!q.items)throw 0;q.id=uid();QUOTES.push(q);SV('ms_quotes',QUOTES);render();alert('أُضيف العرض: '+q.items.length+' صنف')}catch(e){alert('ملف عرض السعر غير صالح')}}
+ else if(d.qNew!=null){const m=modal(`<h2>عرض سعر جديد</h2><input id="qs" placeholder="المورد"><input id="qn" placeholder="رقم العرض"><input id="qd" type="date" value="${ymd(new Date())}"><textarea id="qi" placeholder="الأصناف: سطر لكل صنف&#10;الاسم، الكمية، سعر الوحدة"></textarea><button class="btn" id="qok">حفظ</button>`);
+  m.querySelector('#qok').onclick=()=>{const items=[];m.querySelector('#qi').value.split('\n').forEach((l,i)=>{const p=W(l).split(/[,،\t]/).map(s=>s.trim());if(p[0]){const qty=+p[1]||1,pr=+p[2]||0,g=qty*pr;items.push({n:i+1,en:p[0],qty,price:pr,gross:g,vat:g*0.05,total:g*1.05,unit:''})}});const s=m.querySelector('#qs').value.trim();if(!s)return;QUOTES.push({id:uid(),supplier:s,no:m.querySelector('#qn').value,date:m.querySelector('#qd').value,status:'عرض سعر',items});SV('ms_quotes',QUOTES);m.remove();render()}}
+ else if(d.qDel){if(confirm('حذف العرض؟')){QUOTES=QUOTES.filter(x=>x.id!==d.qDel);SV('ms_quotes',QUOTES);render()}}
+ else if(d.qView){const q=QUOTES.find(x=>x.id===d.qView),t=qTot(q);modal(`<h2>${esc(q.supplier)} · ${esc(q.no)}</h2>`+(q.items||[]).map(i=>`<div class="it"><b>${esc(i.en||i.desc)}</b> <span class="tag">${esc(i.code||'')}</span><div class="mu">${i.qty} × ${money(i.price)} = ${money(i.gross)}</div></div>`).join('')+`<div class="it"><b>الإجمالي ${money(t.g)} + ضريبة ${money(t.v)} = ${money(t.t)} د.إ</b></div>`+(q.validity?`<div class="mu">الصلاحية: ${esc(q.validity)} · التسليم: ${esc(q.delivery||'')} · الدفع: ${esc(q.payment||'')}</div>`:''))}
+ else if(d.qAtt){const f=await pickFile('application/pdf,.pdf');if(!f)return;const q=QUOTES.find(x=>x.id===d.qAtt);const ab=await f.arrayBuffer();const o={id:uid(),name:'عرض سعر '+q.no+' - '+q.supplier,type:'PDF',size:ab.byteLength,buf:ab};await docsLoad();DOCS.push(o);await docsSave();q.docId=o.id;SV('ms_quotes',QUOTES);render()}
+ else if(d.qPdf){const q=QUOTES.find(x=>x.id===d.qPdf),x=DOCS.find(y=>y.id===q.docId);if(x)window.open(URL.createObjectURL(new Blob([x.buf],{type:'application/pdf'})),'_blank')}
  else if(d.labImp!=null)labImport();
  else if(d.labExp!=null)saveFile('lab-daily-backup-'+ymd(new Date())+'.json',JSON.stringify({app:'lab-daily',data:LAB}));
  else if(d.lt){labT=d.lt;labQ='';render()}
@@ -203,10 +268,33 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
 });
 document.addEventListener('input',e=>{if(e.target.id==='lq'){labQ=e.target.value;clearTimeout(window.__lt);window.__lt=setTimeout(()=>{const p=e.target.selectionStart;render();const n=$('#lq');if(n){n.focus();n.setSelectionRange(p,p)}},350)}
  if(e.target.id==='sq'){const q=e.target.value.trim();document.querySelectorAll('#sl .tile').forEach(b=>{b.style.display=!q||b.textContent.includes(q)?'':'none'})}});
-document.addEventListener('change',e=>{if(e.target.id==='lg'){labG=e.target.value;render()}});
+document.addEventListener('change',e=>{if(e.target.id==='pc'){planC=e.target.value;render()}
+ if(e.target.dataset&&e.target.dataset.qSt){const q=QUOTES.find(x=>x.id===e.target.dataset.qSt);if(q){q.status=e.target.value;SV('ms_quotes',QUOTES)}}
+ if(e.target.dataset&&e.target.dataset.plSt!=null){const id=e.target.dataset.plSt,v=e.target.value,t=PTASKS.find(x=>x.id===id);if(t)t.st=v,SV('ms_ptasks',PTASKS);else{PLAN[id]=Object.assign(PLAN[id]||{},{st:v});SV('ms_plan',PLAN)}}
+ if(e.target.id==='lg'){labG=e.target.value;render()}});
 function shareTxt(t){if(navigator.share)navigator.share({text:t}).catch(()=>{});else{navigator.clipboard&&navigator.clipboard.writeText(t);alert('نُسخ النص')}}
+async function zipRead(buf,pick){const b=new Uint8Array(buf),dv=new DataView(b.buffer);let e=b.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw 0;
+ let n=dv.getUint16(e+10,true),p=dv.getUint32(e+16,true);
+ for(;n--;){const m=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),nm=new TextDecoder().decode(b.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+  if(pick(nm)){const s=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true),raw=b.subarray(s,s+cs);
+   if(m===0)return new TextDecoder().decode(raw);
+   return await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()}}
+ throw 0}
+async function docxText(f){const x=await zipRead(await f.arrayBuffer(),n=>n==='word/document.xml');
+ const dx=new DOMParser().parseFromString(x,'text/xml'),ps=dx.getElementsByTagNameNS('*','p'),out=[];
+ for(const p of ps){const t=[...p.getElementsByTagNameNS('*','t')].map(n=>n.textContent).join('').trim();if(t)out.push(t)}
+ let s=out.join('\n');const k=(s.match(/آ/g)||[]).length,L=(s.match(/[\u0621-\u064A]/g)||[]).length||1;
+ if(k/L>0.01)s=s.replace(/آ/g,'ك').replace(/ال?قرك/g,m=>m.replace('ك','آ'));
+ return s}
+async function unzipJson(f){const b=new Uint8Array(await f.arrayBuffer()),dv=new DataView(b.buffer);let e=b.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw 0;
+ let n=dv.getUint16(e+10,true),p=dv.getUint32(e+16,true);
+ for(;n--;){const m=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),nm=new TextDecoder().decode(b.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+  if(/\.json$/i.test(nm)&&nm.indexOf('__MACOSX')<0&&nm.split('/').pop().charAt(0)!=='.'){const s=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true),raw=b.subarray(s,s+cs);
+   if(m===0)return new TextDecoder().decode(raw);
+   const r=new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw')));return await r.text()}}
+ throw 0}
 async function labImport(){const f=await pickFile();if(!f)return;let j;
- try{j=JSON.parse(await f.text())}catch(e){alert('تعذرت قراءة الملف');return}
+ try{const isZ=/\.zip$/i.test(f.name)||f.type==='application/zip';j=JSON.parse(isZ?await unzipJson(f):await f.text())}catch(e){alert('تعذرت قراءة الملف. إن كان مضغوطاً فجرّب فك الضغط ثم اختر ملف JSON');return}
  const d=j&&j.app==='lab-daily'?j.data:(j&&j.preps&&j.experiments?j:null);
  if(!d){alert('هذا الملف ليس نسخة من تطبيق مختبري');return}
  const c=(d.preps||[]).length+' تحضير، '+(d.visits||[]).length+' زيارة، '+(d.experiments||[]).length+' تجربة، '+(d.materials||[]).length+' مادة';
